@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: mission-control
+
+  # データベース設定 (H2をファイル保存モードで起動、プロジェクト直下の /data フォルダに保存されます)
+  datasource:
+    url: jdbc:h2:file:./data/mission_db;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: neo
+    password: matrix_password
+
+  # H2コンソール（ブラウザからDBの中身を覗けるコックピット）の設定
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        trace: false
+        web-allow-others: false
+
+  # JPA / Hibernate の設定 (Javaのクラスから自動でテーブルを生成・更新します)
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
