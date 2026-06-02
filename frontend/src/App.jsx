@@ -382,72 +382,71 @@ export default function App() {
                 </button>
               </div>
             </div>
-            <div className="attendance-body">
-              <div className="matrix-grid">
-                {operators.map(op => {
-                  const isPresent = presentIds.includes(op.id);
-                  const roleBadges = getRoleBadges(op.id);
-                  return (
-                    <div key={op.id} className={`operator-card ${isPresent ? 'present' : 'absent'}`} onClick={() => toggleAttendance(op.id)}>
-                      <div className="op-id">ID:{String(op.displayOrder).padStart(2, '0')}</div>
-                      <div className="op-name">{displayName(op)}</div>
-                      {roleBadges.length > 0 && (
-                        <div className="op-role-badges">
-                          {roleBadges.map(b => <span key={b.label} className={`role-badge ${b.cls}`}>{b.label}</span>)}
-                        </div>
-                      )}
-                      <div className="op-status">{isPresent ? '▶ INSERTED' : '▷ EMPTY'}</div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <aside className="side-deck" aria-label="シフト状況">
-                <div className="side-deck__block">
-                  <div className="side-deck__heading">:: SHIFT LOAD [時間割連動]</div>
-                  <div className="shift-phase-label">{activeBlock.label}</div>
-                  <div className={`segment-gauge ${gaugeClass}`} title={`${Math.round(shiftProgress)}%`}>
-                    {Array.from({ length: 10 }, (_, i) => (
-                      <div
-                        key={i}
-                        className={`segment-gauge__cell ${i < filledSegments ? 'segment-gauge__cell--on' : ''}`}
-                      />
-                    ))}
+            <div className="matrix-grid">
+              {operators.map(op => {
+                const isPresent = presentIds.includes(op.id);
+                const roleBadges = getRoleBadges(op.id);
+                return (
+                  <div key={op.id} className={`operator-card ${isPresent ? 'present' : 'absent'}`} onClick={() => toggleAttendance(op.id)}>
+                    <div className="op-id">ID:{String(op.displayOrder).padStart(2, '0')}</div>
+                    <div className="op-name">{displayName(op)}</div>
+                    {roleBadges.length > 0 && (
+                      <div className="op-role-badges">
+                        {roleBadges.map(b => <span key={b.label} className={`role-badge ${b.cls}`}>{b.label}</span>)}
+                      </div>
+                    )}
+                    <div className="op-status">{isPresent ? '▶ INSERTED' : '▷ EMPTY'}</div>
                   </div>
-                  <div className="side-deck__meta">
-                    {activeBlock.active
-                      ? `${Math.round(shiftProgress)}% · 残り約${shiftRemainingMin}分 · ${sourceLabel(activeBlock.source)}`
-                      : activeBlock.rangeLabel}
-                  </div>
-                  <div className="side-deck__time">{activeBlock.rangeLabel}</div>
-                  <div className="side-deck__actions shift-actions-grid">
-                    <button type="button" className="retro-mini-btn" onClick={() => extendBlock(5)} disabled={!activeBlock.active}>+5</button>
-                    <button type="button" className="retro-mini-btn" onClick={() => extendBlock(10)} disabled={!activeBlock.active}>+10</button>
-                    <button type="button" className="retro-mini-btn" onClick={skipToNext}>NEXT</button>
-                    <button type="button" className="retro-mini-btn" onClick={resetToAuto} disabled={!isManualMode}>AUTO</button>
-                    <button type="button" className="retro-mini-btn" onClick={cycleFreeMinutes}>{freeMinutes}M</button>
-                    <button type="button" className="retro-mini-btn" onClick={startFreeMode}>FREE</button>
-                    <button type="button" className="retro-mini-btn" onClick={syncDownTimerToShift} disabled={!activeBlock.active}>SYNC</button>
-                  </div>
-                </div>
-
-                <div className="side-deck__block side-deck__block--ops">
-                  <div className="side-deck__heading">:: FIELD OPS [巡視・対応]</div>
-                  <div className="ops-counter-value">{opsCount}</div>
-                  <div className="ops-counter-rank">RANK: {opsRank}</div>
-                  <div className="side-deck__actions ops-counter-actions">
-                    <button type="button" className="retro-mini-btn" onClick={decrementOps} disabled={opsCount === 0}>−</button>
-                    <button type="button" className="retro-mini-btn ops-counter-plus" onClick={incrementOps}>
-                      ＋ LOG
-                    </button>
-                    <button type="button" className="retro-mini-btn danger" onClick={resetOps}>RST</button>
-                  </div>
-                  <p className="side-deck__hint">質問対応・巡視のたびに＋LOG</p>
-                </div>
-              </aside>
+                );
+              })}
             </div>
           </div>
         </div>
+
+        {/* CENTER COLUMN: SHIFT & OPS */}
+        <aside className="cyber-panel side-deck" aria-label="シフト状況">
+          <div className="side-deck__block">
+            <div className="side-deck__heading">:: SHIFT LOAD [時間割連動]</div>
+            <div className="shift-phase-label">{activeBlock.label}</div>
+            <div className={`segment-gauge ${gaugeClass}`} title={`${Math.round(shiftProgress)}%`}>
+              {Array.from({ length: 10 }, (_, i) => (
+                <div
+                  key={i}
+                  className={`segment-gauge__cell ${i < filledSegments ? 'segment-gauge__cell--on' : ''}`}
+                />
+              ))}
+            </div>
+            <div className="side-deck__meta">
+              {activeBlock.active
+                ? `${Math.round(shiftProgress)}% · 残り約${shiftRemainingMin}分 · ${sourceLabel(activeBlock.source)}`
+                : activeBlock.rangeLabel}
+            </div>
+            <div className="side-deck__time">{activeBlock.rangeLabel}</div>
+            <div className="side-deck__actions shift-actions-grid">
+              <button type="button" className="retro-mini-btn" onClick={() => extendBlock(5)} disabled={!activeBlock.active}>+5</button>
+              <button type="button" className="retro-mini-btn" onClick={() => extendBlock(10)} disabled={!activeBlock.active}>+10</button>
+              <button type="button" className="retro-mini-btn" onClick={skipToNext}>NEXT</button>
+              <button type="button" className="retro-mini-btn" onClick={resetToAuto} disabled={!isManualMode}>AUTO</button>
+              <button type="button" className="retro-mini-btn" onClick={cycleFreeMinutes}>{freeMinutes}M</button>
+              <button type="button" className="retro-mini-btn" onClick={startFreeMode}>FREE</button>
+              <button type="button" className="retro-mini-btn" onClick={syncDownTimerToShift} disabled={!activeBlock.active}>SYNC</button>
+            </div>
+          </div>
+
+          <div className="side-deck__block side-deck__block--ops">
+            <div className="side-deck__heading">:: FIELD OPS [巡視・対応]</div>
+            <div className="ops-counter-value">{opsCount}</div>
+            <div className="ops-counter-rank">RANK: {opsRank}</div>
+            <div className="side-deck__actions ops-counter-actions">
+              <button type="button" className="retro-mini-btn" onClick={decrementOps} disabled={opsCount === 0}>−</button>
+              <button type="button" className="retro-mini-btn ops-counter-plus" onClick={incrementOps}>
+                ＋ LOG
+              </button>
+              <button type="button" className="retro-mini-btn danger" onClick={resetOps}>RST</button>
+            </div>
+            <p className="side-deck__hint">質問対応・巡視のたびに＋LOG</p>
+          </div>
+        </aside>
 
         {/* RIGHT COLUMN: GADGETS & LOGS */}
         <aside className="dashboard-sidebar">

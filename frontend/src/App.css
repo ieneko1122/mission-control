@@ -58,11 +58,7 @@ body {
   }
 
   .dashboard-grid {
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
-  }
-
-  .side-deck {
-    max-width: 240px;
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 220px) minmax(260px, 340px);
   }
 }
 
@@ -104,7 +100,7 @@ body {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+  grid-template-columns: minmax(0, 1fr) minmax(160px, 200px) minmax(240px, 300px);
   gap: 8px;
   align-items: stretch;
   flex: 1;
@@ -366,15 +362,8 @@ body::before {
   min-height: 0;
 }
 
-.attendance-body {
-  display: flex;
-  gap: 8px;
-  align-items: stretch;
-  margin-top: 6px;
-  min-width: 0;
-}
-
 .matrix-grid {
+  margin-top: 6px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
@@ -382,14 +371,12 @@ body::before {
   min-width: 0;
 }
 
-/* 右余白: 進行ゲージ＋業務カウンター（画像素材なし） */
+/* CENTER COLUMN: 進行ゲージ＋業務カウンター */
 .side-deck {
-  flex: 1 1 180px;
-  min-width: 160px;
-  max-width: 240px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 0;
 }
 
 .side-deck__block {
@@ -678,17 +665,7 @@ body::before {
     grid-template-columns: 1fr;
   }
 
-  .attendance-body {
-    flex-direction: column;
-  }
-
-  .matrix-grid {
-    max-width: none;
-    flex: 1 1 auto;
-  }
-
   .side-deck {
-    max-width: none;
     flex-direction: row;
     flex-wrap: wrap;
   }
