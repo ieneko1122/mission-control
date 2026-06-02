@@ -58,7 +58,7 @@ body {
   }
 
   .dashboard-grid {
-    grid-template-columns: minmax(0, 1fr) minmax(180px, 220px) minmax(260px, 340px);
+    grid-template-columns: minmax(0, 1.2fr) minmax(170px, 210px) minmax(260px, 320px);
   }
 }
 
@@ -125,8 +125,8 @@ body {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(160px, 200px) minmax(240px, 300px);
-  gap: 8px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(150px, 190px) minmax(240px, 290px);
+  gap: 6px;
   align-items: stretch;
   flex: 1;
   min-height: 0;
@@ -135,7 +135,7 @@ body {
 .dashboard-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   min-width: 0;
   min-height: 0;
   height: 100%;
@@ -155,7 +155,7 @@ body {
 .controls-grid {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 8px;
+  gap: 6px;
   margin-top: 6px;
   align-items: stretch;
 }
@@ -189,7 +189,7 @@ body::before {
   border: 2px solid #1a2936;
   background: #080c12;
   box-shadow: 3px 3px 0px #0b121a;
-  padding: 7px 10px;
+  padding: 6px 8px;
   position: relative;
 }
 
@@ -381,19 +381,18 @@ body::before {
 
 /* 出席パネル（9名・3×3） */
 .attendance-panel {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
   min-width: 0;
   min-height: 0;
 }
 
 .matrix-grid {
-  margin-top: 6px;
+  margin-top: 4px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-content: stretch;
-  gap: 8px;
-  flex: 1;
+  gap: 6px;
   min-width: 0;
   min-height: 0;
 }
@@ -402,7 +401,7 @@ body::before {
 .side-deck {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
   min-width: 0;
 }
 
@@ -677,7 +676,7 @@ body::before {
 
 .roster-panel {
   border-color: #00ffff;
-  margin-top: 12px;
+  margin-top: 6px;
   box-shadow: 0 0 15px rgba(0, 255, 255, 0.15);
 }
 
