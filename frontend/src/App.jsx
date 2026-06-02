@@ -199,7 +199,6 @@ export default function App() {
     localStorage.setItem('mission_ops_date', today);
     addLog(`FIELD OP #${next} LOGGED.`);
     if (OPS_MILESTONES[next]) addLog(OPS_MILESTONES[next]);
-    setAquariumSpawn(n => n + 1);
   };
 
   const decrementOps = () => {
@@ -533,17 +532,23 @@ export default function App() {
           <div className="roster-grid">
             <div className="roster-card">
               <h3 className="roster-title">ASSEMBLY (1名)</h3>
-              <div className="roster-name roster-highlight"><span style={{color: '#fff'}}>[!]</span> {result.assembly?.[0] ? displayResultName(result.assembly[0]) : '---'}</div>
+              <div className="roster-names">
+                <div className="roster-name roster-highlight"><span style={{color: '#fff'}}>[!]</span> {result.assembly?.[0] ? displayResultName(result.assembly[0]) : '---'}</div>
+              </div>
             </div>
             <div className="roster-card">
               <h3 className="roster-title">REPORT (2名)</h3>
-              {result.report?.map(op => <div key={op.id} className="roster-name roster-highlight"><span style={{color: '#fff'}}>[{'>'}{'>'}]</span> {displayResultName(op)}</div>)}
-              {result.report?.length === 0 && <div className="roster-name" style={{ color: '#2c3b47' }}>---</div>}
+              <div className="roster-names">
+                {result.report?.map(op => <div key={op.id} className="roster-name roster-highlight"><span style={{color: '#fff'}}>[{'>'}{'>'}]</span> {displayResultName(op)}</div>)}
+                {result.report?.length === 0 && <div className="roster-name" style={{ color: '#2c3b47' }}>---</div>}
+              </div>
             </div>
             <div className="roster-card">
               <h3 className="roster-title">FEEDBACK (2名)</h3>
-              {result.feedback?.map(op => <div key={op.id} className="roster-name roster-highlight"><span style={{color: '#fff'}}>[{'>'}{'>'}]</span> {displayResultName(op)}</div>)}
-              {result.feedback?.length === 0 && <div className="roster-name" style={{ color: '#2c3b47' }}>---</div>}
+              <div className="roster-names">
+                {result.feedback?.map(op => <div key={op.id} className="roster-name roster-highlight"><span style={{color: '#fff'}}>[{'>'}{'>'}]</span> {displayResultName(op)}</div>)}
+                {result.feedback?.length === 0 && <div className="roster-name" style={{ color: '#2c3b47' }}>---</div>}
+              </div>
             </div>
           </div>
         </div>

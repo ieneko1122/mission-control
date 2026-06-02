@@ -104,12 +104,16 @@ body {
   align-items: center;
   gap: 8px;
   border-top: 3px double #00ffaa;
-  padding-top: 4px;
-  margin-top: 8px;
+  padding-top: 8px;
+  margin-top: 12px;
   font-size: 10px;
   letter-spacing: 1px;
   color: #336655;
   flex-shrink: 0;
+}
+
+.footer-status {
+  color: #5a8f7d;
 }
 
 .footer-center {
@@ -125,10 +129,11 @@ body {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(150px, 190px) minmax(240px, 290px);
-  gap: 6px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(150px, 185px) minmax(230px, 280px);
+  gap: 10px;
   align-items: stretch;
-  flex: 1;
+  /* 縦の余白配分: 出席グリッド : ROSTER : SEQUENCE = 6 : 2.2 : 1.3 */
+  flex: 6 1 0;
   min-height: 0;
 }
 
@@ -155,9 +160,11 @@ body {
 .controls-grid {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 6px;
-  margin-top: 6px;
+  gap: 10px;
+  margin-top: 10px;
   align-items: stretch;
+  flex: 0.95 1 0;
+  min-height: 0;
 }
 
 .cyber-btn--warn {
@@ -228,7 +235,7 @@ body::before {
 }
 
 .cyber-btn.main-btn {
-  font-size: 14px;
+  font-size: 16px;
   background: #002211;
   border-width: 3px;
 }
@@ -335,7 +342,7 @@ body::before {
 }
 
 .queue-label { color: #995c00; }
-.queue-empty { color: #444; }
+.queue-empty { color: #6c7a72; }
 
 .log-panel {
   background: #020305;
@@ -349,7 +356,7 @@ body::before {
 
 .log-panel__title {
   font-size: 9px;
-  color: #444;
+  color: #6f7d74;
   border-bottom: 1px dotted #222;
   margin-bottom: 4px;
   padding-bottom: 2px;
@@ -387,15 +394,24 @@ body::before {
   min-height: 0;
 }
 
+/* ラッパー div を伸ばし、matrix-grid の flex:1 を有効化して下余白を解消 */
+.attendance-panel > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .matrix-grid {
-  margin-top: 4px;
+  margin-top: 6px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-auto-rows: 1fr;
-  gap: 6px;
+  grid-template-rows: repeat(3, 1fr);
+  gap: 10px;
   flex: 1;
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
 }
 
 /* CENTER COLUMN: 進行ゲージ＋業務カウンター */
@@ -417,6 +433,12 @@ body::before {
 
 .side-deck__block--ops {
   border-color: #2a3a4a;
+  flex: 0 0 auto;
+  justify-content: center;
+}
+
+/* SHIFT LOAD 側を主役に伸ばす */
+.side-deck__block:not(.side-deck__block--ops) {
   flex: 1;
 }
 
@@ -428,7 +450,7 @@ body::before {
 
 .side-deck__meta {
   font-size: 9px;
-  color: #6a8a99;
+  color: #93b4c4;
   text-align: center;
 }
 
@@ -445,7 +467,7 @@ body::before {
 .side-deck__hint {
   margin: 0;
   font-size: 8px;
-  color: #445566;
+  color: #6f8593;
   text-align: center;
   line-height: 1.3;
 }
@@ -454,6 +476,7 @@ body::before {
   display: flex;
   gap: 3px;
   height: 24px;
+  margin: 8px 0 10px;
   cursor: default;
 }
 
@@ -522,7 +545,7 @@ body::before {
 
 .side-deck__time {
   font-size: 8px;
-  color: #556677;
+  color: #7e95a5;
   text-align: center;
   margin-top: -2px;
 }
@@ -530,13 +553,20 @@ body::before {
 .shift-actions-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 4px;
+  grid-auto-rows: 1fr;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+  min-height: 0;
+  margin-top: 2px;
 }
 
 .shift-actions-grid .retro-mini-btn {
-  font-size: 8px;
-  padding: 3px 0;
+  font-size: 10px;
+  padding: 5px 0;
   min-width: 0;
+  min-height: 26px;
+  max-height: 32px;
 }
 
 @keyframes gauge-pulse {
@@ -593,7 +623,7 @@ body::before {
 
 .operator-card .op-id { font-size: 9px; color: #445566; letter-spacing: 0.5px; }
 .operator-card .op-name {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 900;
   margin: 0;
   color: #8899aa;
@@ -677,14 +707,22 @@ body::before {
 
 .roster-panel {
   border-color: #00ffff;
-  margin-top: 6px;
+  margin-top: 10px;
   box-shadow: 0 0 15px rgba(0, 255, 255, 0.15);
+  flex: 1.6 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .roster-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
   gap: 10px;
+  flex: 1;
+  min-height: 0;
+  margin-top: 6px;
 }
 
 /* --- レスポンシブ --- */
@@ -830,9 +868,23 @@ body::before {
   display: inline-block;
 }
 
-.roster-card { border: 1px dashed #00ffff; background: #00111a; padding: 8px; }
-.roster-title { margin: 0 0 4px 0; font-size: 11px; color: #00ffff; border-bottom: 1px dotted rgba(0,255,255,0.3); padding-bottom: 2px; }
-.roster-name { font-size: 15px; color: #fff; font-weight: bold; }
+.roster-card {
+  border: 1px dashed #00ffff;
+  background: #00111a;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+}
+.roster-title { margin: 0 0 4px 0; font-size: 11px; color: #00ffff; border-bottom: 1px dotted rgba(0,255,255,0.3); padding-bottom: 2px; flex-shrink: 0; }
+.roster-names {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+.roster-name { font-size: 16px; color: #fff; font-weight: bold; line-height: 1.35; }
 
 /* 🌟 タイマー操作用ミニボタン (統合版) 🌟 */
 .retro-mini-btn {
