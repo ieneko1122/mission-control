@@ -381,8 +381,8 @@ body::before {
 
 /* 出席パネル（9名・3×3） */
 .attendance-panel {
-  display: grid;
-  grid-template-rows: auto auto 1fr;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   min-height: 0;
 }
@@ -391,8 +391,9 @@ body::before {
   margin-top: 4px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-content: stretch;
+  grid-auto-rows: 1fr;
   gap: 6px;
+  flex: 1;
   min-width: 0;
   min-height: 0;
 }
