@@ -557,6 +557,12 @@ export default function App() {
         </button>
       </div>
 
+      <footer className="app-footer">
+        <span className="footer-status"><span className="accent-green">[SYS_OK]</span> CENTRAL MATRIX ONLINE</span>
+        <span className="footer-center">:: MISSION_MGMNT_SYS :: SYS_CTRL_v3.00 ::</span>
+        <span className="footer-right accent-orange">{new Date().toLocaleDateString('ja-JP')} <span className="blinking-cursor">█</span></span>
+      </footer>
+
       {showAdmin && createPortal(
         <div className="modal-overlay" onClick={() => setShowAdmin(false)}>
           <div className="cyber-panel admin modal-content" onClick={(e) => e.stopPropagation()}>

@@ -98,6 +98,31 @@ body {
 .accent-green { color: #00ffaa; }
 .accent-orange { color: #ff9900; }
 
+.app-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  border-top: 3px double #00ffaa;
+  padding-top: 4px;
+  margin-top: 8px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #336655;
+  flex-shrink: 0;
+}
+
+.footer-center {
+  color: #00ffaa;
+  opacity: 0.5;
+  text-align: center;
+  flex: 1;
+}
+
+.footer-right {
+  flex-shrink: 0;
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(160px, 200px) minmax(240px, 300px);
@@ -354,7 +379,7 @@ body::before {
   border-top: 1px dotted #222;
 }
 
-/* 出席パネル（9名・3×3 ＋ サイドデック） */
+/* 出席パネル（9名・3×3） */
 .attendance-panel {
   display: flex;
   flex-direction: column;
@@ -366,9 +391,11 @@ body::before {
   margin-top: 6px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: stretch;
   gap: 8px;
-  flex: 1 1 300px;
+  flex: 1;
   min-width: 0;
+  min-height: 0;
 }
 
 /* CENTER COLUMN: 進行ゲージ＋業務カウンター */
@@ -551,6 +578,7 @@ body::before {
   user-select: none;
   box-shadow: 2px 2px 0px #05080c;
   min-height: 58px;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
