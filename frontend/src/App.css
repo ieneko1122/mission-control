@@ -14,6 +14,13 @@ html {
   height: 100%;
 }
 
+#root {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 body {
   margin: 0;
   height: 100%;
@@ -593,6 +600,41 @@ body::before {
 .operator-card.present .op-id { color: #00ffaa; }
 .operator-card.present .op-name { color: #fff; text-shadow: 0 0 4px #00ffaa; }
 .operator-card.present .op-status { color: #00ffaa; font-weight: bold; opacity: 1; }
+
+.op-role-badges {
+  display: flex;
+  gap: 3px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.role-badge {
+  font-size: 8px;
+  font-weight: bold;
+  padding: 1px 4px;
+  border-radius: 2px;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+}
+
+.role-badge--assembly {
+  background: #002211;
+  color: #00ffaa;
+  border: 1px solid #00ffaa;
+  text-shadow: 0 0 4px #00ffaa;
+}
+
+.role-badge--report {
+  background: #001a33;
+  color: #00ccff;
+  border: 1px solid #00ccff;
+}
+
+.role-badge--feedback {
+  background: #1a0a00;
+  color: #ff9900;
+  border: 1px solid #ff9900;
+}
 
 .attendance-toolbar {
   margin-top: 4px;

@@ -79,7 +79,7 @@ export default function App() {
   const completedPhaseKeysRef = useRef(new Set());
 
   const addLog = (msg) => {
-    setLogTerminal(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev.slice(0, 4)]);
+    setLogTerminal(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev.slice(0, 7)]);
   };
 
   useEffect(() => {
@@ -97,8 +97,10 @@ export default function App() {
     try {
       const res = await fetch(`${API_BASE}/status`);
       const data = await res.json();
-      setOperators(data.operators || []);
+      const ops = data.operators || [];
+      setOperators(ops);
       setQueues(data.queues || { report: [], feedback: [] });
+      setPresentIds(ops.map(op => op.id));
     } catch (err) {
       addLog('ERROR: SYSTEM LINK FAILED.');
     }
@@ -232,6 +234,15 @@ export default function App() {
   const displayResultName = (resultOp) => {
     const fresh = operators.find(o => o.id === resultOp.id);
     return displayName(fresh ?? resultOp);
+  };
+
+  const getRoleBadges = (opId) => {
+    if (!result) return [];
+    const badges = [];
+    if (result.assembly?.some(o => o.id === opId)) badges.push({ label: '朝', cls: 'role-badge--assembly' });
+    if (result.report?.some(o => o.id === opId)) badges.push({ label: '報', cls: 'role-badge--report' });
+    if (result.feedback?.some(o => o.id === opId)) badges.push({ label: 'F', cls: 'role-badge--feedback' });
+    return badges;
   };
 
   const toggleAttendance = (id) => {
@@ -375,10 +386,16 @@ export default function App() {
               <div className="matrix-grid">
                 {operators.map(op => {
                   const isPresent = presentIds.includes(op.id);
+                  const roleBadges = getRoleBadges(op.id);
                   return (
                     <div key={op.id} className={`operator-card ${isPresent ? 'present' : 'absent'}`} onClick={() => toggleAttendance(op.id)}>
                       <div className="op-id">ID:{String(op.displayOrder).padStart(2, '0')}</div>
                       <div className="op-name">{displayName(op)}</div>
+                      {roleBadges.length > 0 && (
+                        <div className="op-role-badges">
+                          {roleBadges.map(b => <span key={b.label} className={`role-badge ${b.cls}`}>{b.label}</span>)}
+                        </div>
+                      )}
                       <div className="op-status">{isPresent ? '▶ INSERTED' : '▷ EMPTY'}</div>
                     </div>
                   );
