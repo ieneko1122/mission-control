@@ -73,10 +73,10 @@ body {
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 4px 12px;
+  gap: 2px 12px;
   border-bottom: 3px double #00ffaa;
-  padding-bottom: 4px;
-  margin-bottom: 8px;
+  padding-bottom: 3px;
+  margin-bottom: 6px;
 }
 
 .app-title {
@@ -1044,19 +1044,19 @@ body::before {
 }
 /* ─────────────────────────────────────────────────────────────────────────── */
 
-/* ── 機能A: ヘッダー日付表示 ───────────────────────────────────── */
+/* ── 機能A: ヘッダー日付表示（2行目・全幅で中央寄せ） ─────────── */
 .header-date-bar {
-  flex: 1;
+  flex-basis: 100%;
+  order: 99;
   text-align: center;
-  padding: 0 8px;
-  min-width: 180px;
+  padding: 2px 0 0;
 }
 
 .header-date-text {
-  font-size: clamp(14px, 2.4vw, 20px);
+  font-size: clamp(15px, 2vw, 21px);
   font-weight: bold;
-  letter-spacing: 3px;
-  text-shadow: 0 0 10px currentColor;
+  letter-spacing: 2px;
+  text-shadow: 0 0 12px currentColor;
   font-family: 'Courier New', Courier, monospace;
 }
 
@@ -1112,12 +1112,10 @@ body::before {
 /* ── 機能B: 前/次キャプション ──────────────────────────────────── */
 .roster-prevnext {
   font-size: 9px;
-  color: #3a5a6a;
-  margin-top: 5px;
-  padding-top: 4px;
-  border-top: 1px dotted #1a3040;
+  color: #6595a5;
+  margin-top: 3px;
   letter-spacing: 0.3px;
-  line-height: 1.4;
+  line-height: 1.3;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
