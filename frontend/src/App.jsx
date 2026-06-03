@@ -445,6 +445,16 @@ export default function App() {
     );
   };
 
+  // 機能B+C: ROSTER の確定者1行（出席カードと同じ ID タグで情報密度を統一）
+  const renderRosterName = (op) => (
+    <div key={op.id} className="roster-name roster-highlight">
+      <span className="roster-op-id">{String(op.displayOrder).padStart(2, '0')}</span>
+      <span className="roster-op-name">{displayResultName(op)}</span>
+    </div>
+  );
+
+  const rosterEmpty = <div className="roster-name roster-name--empty">-- ///</div>;
+
   return (
     <div className={`app-shell ${isTimeOverAlert ? 'time-over-flash' : ''}`}>
       {/* 全画面背景レイヤー: セグメントフィッシュ */}
@@ -454,12 +464,11 @@ export default function App() {
         <h1 className="app-title">
           <span className="accent-green">[{'>'}{'>'}]</span> MISSION_MGMNT_SYS <span className="app-subtitle">[SYS_CTRL_v3.00_GAME_MODE]</span>
         </h1>
-        {/* 機能A: 曜日 // ISO日付（WED // 2026-06-03） */}
+        {/* 機能A: ISO日付 [曜日]（2026-06-03 [WED]） */}
         <div className="header-date-bar">
           <span className="header-date-text">
-            <span className="header-dow" style={{ color: dayColor }}>{dayNameEn}</span>
-            <span className="header-date-sep"> // </span>
             <span className="header-date-iso">{todayStr}</span>
+            <span className="header-dow" style={{ color: dayColor }}> [{dayNameEn}]</span>
           </span>
         </div>
         <div className="header-right">
@@ -467,8 +476,9 @@ export default function App() {
             <button type="button" className="fish-btn" onClick={() => setAquariumSpawn(n => n + 1)}>▶ SPAWN</button>
             <button type="button" className="fish-btn fish-btn--clr" onClick={() => setAquariumClear(n => n + 1)}>✕ CLR</button>
           </div>
-          <div className="retro-clock">
-            TIME <span className="accent-orange">{currentTime}</span>
+          <div className="retro-clock" title="現在時刻 (デジタル時計)">
+            <span className="clock-dot" />
+            <span className="clock-digits">{currentTime}</span>
           </div>
         </div>
       </header>
@@ -646,32 +656,30 @@ export default function App() {
         <div className="roster-grid">
           {/* ASSEMBLY */}
           <div className="roster-card">
-            <h3 className="roster-title">ASSEMBLY (1名)</h3>
+            <h3 className="roster-title">ASSEMBLY <span className="roster-slot">&times;1</span></h3>
             <div className="roster-names">
-              <div className="roster-name roster-highlight">
-                <span style={{ color: '#fff' }}>[!]</span> {result?.assembly?.[0] ? displayResultName(result.assembly[0]) : '---'}
-              </div>
+              {result?.assembly?.[0] ? renderRosterName(result.assembly[0]) : rosterEmpty}
             </div>
             {renderPrevNext('ASSEMBLY')}
           </div>
           {/* REPORT */}
           <div className="roster-card">
-            <h3 className="roster-title">REPORT (2名)</h3>
+            <h3 className="roster-title">REPORT <span className="roster-slot">&times;2</span></h3>
             <div className="roster-names">
               {result?.report?.length > 0
-                ? result.report.map(op => <div key={op.id} className="roster-name roster-highlight"><span style={{ color: '#fff' }}>[{'>'}{'>'}]</span> {displayResultName(op)}</div>)
-                : <div className="roster-name" style={{ color: '#2c3b47' }}>---</div>
+                ? result.report.map(op => renderRosterName(op))
+                : rosterEmpty
               }
             </div>
             {renderPrevNext('REPORT')}
           </div>
           {/* FEEDBACK */}
           <div className="roster-card">
-            <h3 className="roster-title">FEEDBACK (2名)</h3>
+            <h3 className="roster-title">FEEDBACK <span className="roster-slot">&times;2</span></h3>
             <div className="roster-names">
               {result?.feedback?.length > 0
-                ? result.feedback.map(op => <div key={op.id} className="roster-name roster-highlight"><span style={{ color: '#fff' }}>[{'>'}{'>'}]</span> {displayResultName(op)}</div>)
-                : <div className="roster-name" style={{ color: '#2c3b47' }}>---</div>
+                ? result.feedback.map(op => renderRosterName(op))
+                : rosterEmpty
               }
             </div>
             {renderPrevNext('FEEDBACK')}
@@ -683,7 +691,7 @@ export default function App() {
       <div className="controls-grid">
         <button type="button" className="cyber-btn main-btn" onClick={triggerAllocation}>:: RUN ALLOCATION SEQUENCE ::</button>
         <button type="button" className="cyber-btn cyber-btn--warn" onClick={() => setShowAdmin(true)}>
-          // EMERGENCY PROTOCOL
+          EMERGENCY PROTOCOL
         </button>
       </div>
 
