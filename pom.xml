@@ -111,6 +111,13 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <!--
+                      Java 21 + Windows: Selectorの内部パイプにAF_UNIXソケットを使う。
+                      置き場が既定でTEMP（ネット/ローミング先に飛んでいることがある）だと
+                      オフライン時にTomcat起動が "Invalid argument: connect" で失敗し、
+                      アプリ(とH2 DB)が起動しない。tmpdirをローカルのtargetに固定して回避する。
+                    -->
+                    <jvmArguments>-Djdk.net.unixdomain.tmpdir=${project.build.directory}</jvmArguments>
                 </configuration>
             </plugin>
             <plugin>
