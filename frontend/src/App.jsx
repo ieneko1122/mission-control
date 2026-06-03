@@ -295,15 +295,6 @@ export default function App() {
     return displayName(fresh ?? resultOp);
   };
 
-  const getRoleBadges = (opId) => {
-    if (!result) return [];
-    const badges = [];
-    if (result.assembly?.some(o => o.id === opId)) badges.push({ label: '朝', cls: 'role-badge--assembly' });
-    if (result.report?.some(o => o.id === opId)) badges.push({ label: '報', cls: 'role-badge--report' });
-    if (result.feedback?.some(o => o.id === opId)) badges.push({ label: 'F', cls: 'role-badge--feedback' });
-    return badges;
-  };
-
   const toggleAttendance = (id) => {
     setPresentIds(prev => prev.includes(id) ? prev.filter(pId => pId !== id) : [...prev, id]);
   };
@@ -506,16 +497,10 @@ export default function App() {
             <div className="matrix-grid">
               {operators.map(op => {
                 const isPresent = presentIds.includes(op.id);
-                const roleBadges = getRoleBadges(op.id);
                 return (
                   <div key={op.id} className={`operator-card ${isPresent ? 'present' : 'absent'}`} onClick={() => toggleAttendance(op.id)}>
                     <div className="op-id">ID:{String(op.displayOrder).padStart(2, '0')}</div>
                     <div className="op-name">{displayName(op)}</div>
-                    {roleBadges.length > 0 && (
-                      <div className="op-role-badges">
-                        {roleBadges.map(b => <span key={b.label} className={`role-badge ${b.cls}`}>{b.label}</span>)}
-                      </div>
-                    )}
                     <div className="op-status">{isPresent ? '▶ INSERTED' : '▷ EMPTY'}</div>
                   </div>
                 );
@@ -656,7 +641,7 @@ export default function App() {
         <div className="roster-grid">
           {/* ASSEMBLY */}
           <div className="roster-card">
-            <h3 className="roster-title">ASSEMBLY <span className="roster-slot">&times;1</span></h3>
+            <h3 className="roster-title"><span className="roster-icon roster-icon--assembly">&#9670;</span>ASSEMBLY <span className="roster-slot">&times;1</span></h3>
             <div className="roster-names">
               {result?.assembly?.[0] ? renderRosterName(result.assembly[0]) : rosterEmpty}
             </div>
@@ -664,7 +649,7 @@ export default function App() {
           </div>
           {/* REPORT */}
           <div className="roster-card">
-            <h3 className="roster-title">REPORT <span className="roster-slot">&times;2</span></h3>
+            <h3 className="roster-title"><span className="roster-icon roster-icon--report">&#9635;</span>REPORT <span className="roster-slot">&times;2</span></h3>
             <div className="roster-names">
               {result?.report?.length > 0
                 ? result.report.map(op => renderRosterName(op))
@@ -675,7 +660,7 @@ export default function App() {
           </div>
           {/* FEEDBACK */}
           <div className="roster-card">
-            <h3 className="roster-title">FEEDBACK <span className="roster-slot">&times;2</span></h3>
+            <h3 className="roster-title"><span className="roster-icon roster-icon--feedback">&#9673;</span>FEEDBACK <span className="roster-slot">&times;2</span></h3>
             <div className="roster-names">
               {result?.feedback?.length > 0
                 ? result.feedback.map(op => renderRosterName(op))

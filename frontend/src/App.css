@@ -3,8 +3,10 @@
   background-color: #030508;
   color: #00ffaa;
   /* レトロフォント */
-  --font-pixel: 'Press Start 2P', 'Courier New', monospace;
-  --font-jp: 'DotGothic16', 'Courier New', monospace;
+  --font-pixel: 'Press Start 2P', 'Courier New', monospace;       /* 大きい英字・数字（ピクセル） */
+  --font-mono: 'Courier New', Courier, monospace;                  /* 小さい英字（LOG/見出し/名前のKANA） */
+  --font-jp: 'Dela Gothic One', sans-serif;                        /* 太く横長な日本語（混在ラベル含む） */
+  --font-name: 'Courier New', 'Dela Gothic One', sans-serif;       /* 名前: 英字=Courier / 漢字=Dela */
 }
 
 *,
@@ -193,6 +195,9 @@ body {
 }
 
 .cyber-btn--warn {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  letter-spacing: 0;
   border-color: #ff9900;
   color: #ff9900;
   white-space: nowrap;
@@ -317,7 +322,9 @@ body::before {
 }
 
 .cyber-btn.main-btn {
-  font-size: 13px;
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  letter-spacing: 0;
   background: #002211;
   border-width: 3px;
 }
@@ -709,7 +716,7 @@ body::before {
 
 .operator-card .op-id { font-size: 9px; color: #445566; letter-spacing: 0.5px; }
 .operator-card .op-name {
-  font-family: var(--font-jp);
+  font-family: var(--font-name);
   font-size: 14px;
   font-weight: 700;
   margin: 0;
@@ -732,41 +739,6 @@ body::before {
 .operator-card.present .op-id { color: #00ffaa; }
 .operator-card.present .op-name { color: #fff; text-shadow: 0 0 4px #00ffaa; }
 .operator-card.present .op-status { color: #00ffaa; font-weight: bold; opacity: 1; }
-
-.op-role-badges {
-  display: flex;
-  gap: 3px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.role-badge {
-  font-size: 8px;
-  font-weight: bold;
-  padding: 1px 4px;
-  border-radius: 2px;
-  letter-spacing: 0.5px;
-  line-height: 1.4;
-}
-
-.role-badge--assembly {
-  background: #002211;
-  color: #00ffaa;
-  border: 1px solid #00ffaa;
-  text-shadow: 0 0 4px #00ffaa;
-}
-
-.role-badge--report {
-  background: #001a33;
-  color: #00ccff;
-  border: 1px solid #00ccff;
-}
-
-.role-badge--feedback {
-  background: #1a0a00;
-  color: #ff9900;
-  border: 1px solid #ff9900;
-}
 
 .attendance-toolbar {
   margin-top: 4px;
@@ -802,6 +774,14 @@ body::before {
   flex-direction: column;
   overflow: hidden;
   padding: 4px 8px;
+  /* 次の装飾: 主役パネルにCRTスキャンライン（極薄シアン横線）でモニタ感を付与 */
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(0, 255, 255, 0.04) 0px,
+    rgba(0, 255, 255, 0.04) 1px,
+    transparent 1px,
+    transparent 3px
+  );
 }
 
 .roster-grid {
@@ -1027,7 +1007,7 @@ body::before {
 }
 
 .roster-op-name {
-  font-family: var(--font-jp);
+  font-family: var(--font-name);
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1050,6 +1030,17 @@ body::before {
   vertical-align: middle;
   letter-spacing: 0.5px;
 }
+
+/* ROSTERヘッダのミッション種別アイコン（旧 朝/報/F の代替） */
+.roster-icon {
+  margin-right: 6px;
+  font-size: 12px;
+  vertical-align: middle;
+  line-height: 1;
+}
+.roster-icon--assembly { color: #00ffaa; text-shadow: 0 0 6px #00ffaa; }
+.roster-icon--report   { color: #00ccff; text-shadow: 0 0 6px #00ccff; }
+.roster-icon--feedback { color: #ff9900; text-shadow: 0 0 6px #ff9900; }
 
 /* 🌟 タイマー操作用ミニボタン (統合版) 🌟 */
 .retro-mini-btn {
@@ -1322,7 +1313,7 @@ body::before {
 }
 
 .prevnext-name {
-  font-family: var(--font-jp);
+  font-family: var(--font-name);
   font-size: 12px;
   font-weight: bold;
   letter-spacing: 0.3px;
