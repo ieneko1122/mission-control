@@ -58,7 +58,7 @@ body {
   }
 
   .dashboard-grid {
-    grid-template-columns: minmax(0, 1.2fr) minmax(170px, 210px) minmax(260px, 320px);
+    grid-template-columns: minmax(0, 1.2fr) minmax(215px, 260px) minmax(260px, 320px);
   }
 }
 
@@ -129,11 +129,11 @@ body {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(150px, 185px) minmax(230px, 280px);
+  grid-template-columns: minmax(0, 1.35fr) minmax(165px, 200px) minmax(230px, 280px);
   gap: 10px;
   align-items: stretch;
-  /* 縦の余白配分: 出席グリッド : ROSTER : SEQUENCE = 6 : 2.2 : 1.3 */
-  flex: 6 1 0;
+  /* 縦の余白配分: 出席グリッド : ROSTER : SEQUENCE = 5 : 2.3 : 0.95 */
+  flex: 5 1 0;
   min-height: 0;
 }
 
@@ -709,7 +709,7 @@ body::before {
   border-color: #00ffff;
   margin-top: 8px;
   box-shadow: 0 0 15px rgba(0, 255, 255, 0.15);
-  flex: 1.8 1 0;
+  flex: 2.3 1 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
