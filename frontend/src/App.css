@@ -1044,6 +1044,86 @@ body::before {
 }
 /* ─────────────────────────────────────────────────────────────────────────── */
 
+/* ── 機能A: ヘッダー日付表示 ───────────────────────────────────── */
+.header-date-bar {
+  flex: 1;
+  text-align: center;
+  padding: 0 8px;
+  min-width: 180px;
+}
+
+.header-date-text {
+  font-size: clamp(14px, 2.4vw, 20px);
+  font-weight: bold;
+  letter-spacing: 3px;
+  text-shadow: 0 0 10px currentColor;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+/* ── 機能C: 鮮度バッジ ─────────────────────────────────────────── */
+.roster-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 0;
+}
+
+.roster-header .panel-heading {
+  margin: 0;
+}
+
+.freshness-pill {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 8px;
+  letter-spacing: 0.5px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.freshness-pill--ok {
+  background: #002211;
+  color: #00ffaa;
+  border: 1px solid #00ffaa;
+  box-shadow: 0 0 6px rgba(0, 255, 170, 0.4);
+}
+
+.freshness-pill--warn {
+  background: #1a0505;
+  color: #ff3366;
+  border: 1px solid #ff3366;
+  box-shadow: 0 0 6px rgba(255, 51, 102, 0.4);
+  animation: pill-warn-blink 2s infinite;
+}
+
+@keyframes pill-warn-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* ── 機能C: ROSTERが古いデータのときにdimを適用 ──────────────── */
+.roster-panel--stale {
+  opacity: 0.6;
+  filter: saturate(0.4);
+}
+
+/* ── 機能B: 前/次キャプション ──────────────────────────────────── */
+.roster-prevnext {
+  font-size: 9px;
+  color: #3a5a6a;
+  margin-top: 5px;
+  padding-top: 4px;
+  border-top: 1px dotted #1a3040;
+  letter-spacing: 0.3px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
 .time-over-flash { animation: screen-alarm 0.5s infinite steps(2); }
 @keyframes screen-alarm { 0% { background-color: rgba(255, 0, 50, 0.15); } 100% { background-color: transparent; } }
 @keyframes retro-twitch { 0% { transform: translate(1px, 0); } 50% { transform: translate(-1px, 1px); } 100% { transform: translate(0, -1px); } }

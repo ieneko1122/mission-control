@@ -26,6 +26,13 @@ export default function App() {
     return saved ? JSON.parse(saved) : null;
   });
 
+  // 機能B: ローテーション情報（前/次の担当者）
+  const [rotation, setRotation] = useState([]);
+
+  // 機能C: DBからの最終結果メタ（鮮度バッジ用）
+  const [lastResultMeta, setLastResultMeta] = useState(null);
+  const [lastResultFetched, setLastResultFetched] = useState(false);
+
   const [logTerminal, setLogTerminal] = useState(['[SYSTEM] CENTRAL MATRIX ONLINE.']);
   const [showAdmin, setShowAdmin] = useState(false);
 
@@ -78,6 +85,20 @@ export default function App() {
   const lastPhaseIdRef = useRef(null);
   const completedPhaseKeysRef = useRef(new Set());
 
+  // 機能A: 日付・曜日計算
+  const todayDate = new Date();
+  const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+  const dayOfWeek = todayDate.getDay();
+  const dayName = dayNames[dayOfWeek];
+  const dayColor = dayOfWeek === 0 ? '#ff3366' : dayOfWeek === 6 ? '#00ccff' : '#00ffaa';
+  const year = todayDate.getFullYear();
+  const month = todayDate.getMonth() + 1;
+  const day = todayDate.getDate();
+  const todayStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+  // 機能C: 鮮度判定（取得完了後のみ判定する）
+  const isResultStale = lastResultFetched && (!lastResultMeta?.assignedDate || lastResultMeta.assignedDate !== todayStr);
+
   const addLog = (msg) => {
     setLogTerminal(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev.slice(0, 7)]);
   };
@@ -93,6 +114,12 @@ export default function App() {
     return () => clearInterval(id);
   }, [timerActive, stopwatchActive]);
 
+  // 機能B+C: マウント時にDB同期
+  useEffect(() => {
+    fetchLastResult();
+    fetchRotation();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const fetchStatus = async () => {
     try {
       const res = await fetch(`${API_BASE}/status`);
@@ -104,6 +131,39 @@ export default function App() {
     } catch (err) {
       addLog('ERROR: SYSTEM LINK FAILED.');
     }
+  };
+
+  // 機能C: DBから最終結果を取得し、ROSTERとメタを更新
+  const fetchLastResult = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/missions/last-result`);
+      const data = await res.json();
+      setLastResultMeta(data);
+      setLastResultFetched(true);
+      if (data.assignments && data.assignments.length > 0) {
+        const formattedResult = {
+          assembly: data.assignments.find(m => m.missionType === 'ASSEMBLY')?.assignedOperators || [],
+          report: data.assignments.find(m => m.missionType === 'REPORT')?.assignedOperators || [],
+          feedback: data.assignments.find(m => m.missionType === 'FEEDBACK')?.assignedOperators || []
+        };
+        setResult(formattedResult);
+        localStorage.setItem('mission_result', JSON.stringify(formattedResult));
+      } else {
+        setLastResultFetched(true);
+      }
+    } catch (err) {
+      setLastResultFetched(true);
+      addLog('ERROR: DB SYNC FAILED.');
+    }
+  };
+
+  // 機能B: ローテーション（前/次）を取得
+  const fetchRotation = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/missions/rotation`);
+      const data = await res.json();
+      setRotation(data || []);
+    } catch (_) {}
   };
 
   const now = new Date();
@@ -286,6 +346,18 @@ export default function App() {
       if (prev) localStorage.setItem('mission_result_prev', prev);
       setResult(formattedResult);
       localStorage.setItem('mission_result', JSON.stringify(formattedResult));
+
+      // 機能C: 鮮度メタを本日付きに更新
+      setLastResultMeta(prevMeta => ({
+        ...(prevMeta || {}),
+        assignedDate: todayStr,
+        assignments: data
+      }));
+      setLastResultFetched(true);
+
+      // 機能B: ローテーション更新
+      fetchRotation();
+
       addLog('DAILY ROSTER ALLOCATED.');
     } catch (err) {
       addLog('ERROR: PROCESSING INTERRUPTED.');
@@ -300,18 +372,10 @@ export default function App() {
       const data = await res.json();
       addLog(`ROLLBACK EXEC: ${data.message}`);
       setShowAdmin(false);
-
-      const prev = localStorage.getItem('mission_result_prev');
-      if (prev) {
-        setResult(JSON.parse(prev));
-        localStorage.setItem('mission_result', prev);
-        localStorage.removeItem('mission_result_prev');
-        addLog('>> 直前の割当結果を復元しました。');
-      } else {
-        setResult(null);
-        localStorage.removeItem('mission_result');
-        addLog('>> 割当履歴がありません。');
-      }
+      // DBが正（ロールバック後の状態をDBから取得して表示を更新）
+      await fetchLastResult();
+      await fetchRotation();
+      addLog('>> DBから最新状態を復元しました。');
     } catch (err) {
       addLog('ERROR: ROLLBACK REJECTED.');
     }
@@ -332,7 +396,7 @@ export default function App() {
       const data = await res.json();
       addLog(`OVERRIDE APPLIED: ${data.message || 'SUCCESS'}`);
       setShowAdmin(false);
-      await triggerAllocation();
+      await triggerAllocation(); // triggerAllocation 内で fetchRotation も呼ぶ
     } catch (err) {
       addLog('ERROR: OVERRIDE SYNC FAILED.');
       console.error(err);
@@ -340,6 +404,39 @@ export default function App() {
   };
 
   const isTimeOverAlert = timeLeft === 0 && !timerActive && logTerminal[0]?.includes('TIME OVER');
+
+  // 機能C: 鮮度バッジのレンダリング
+  const renderFreshnessBadge = () => {
+    if (!lastResultFetched) return null;
+    const isToday = lastResultMeta?.assignedDate === todayStr;
+    const dateLabel = lastResultMeta?.assignedDate
+      ? (() => {
+          const d = new Date(lastResultMeta.assignedDate + 'T00:00:00');
+          return `${d.getMonth() + 1}/${d.getDate()}`;
+        })()
+      : null;
+    if (isToday) {
+      return <span className="freshness-pill freshness-pill--ok">&#10003; 本日確定（{dateLabel}）</span>;
+    }
+    return (
+      <span className="freshness-pill freshness-pill--warn">
+        &#9888; 本日未実行{dateLabel ? `（前回: ${dateLabel}）` : ''}
+      </span>
+    );
+  };
+
+  // 機能B: カードごとの前/次キャプションレンダリング
+  const renderPrevNext = (type) => {
+    const rot = rotation.find(r => r.type === type);
+    if (!rot) return null;
+    const prevName = rot.previous ? displayName(rot.previous) : '---';
+    const nextName = rot.next ? displayName(rot.next) : '---';
+    return (
+      <div className="roster-prevnext">
+        &#9664; 前: {prevName}&#x3000;次 &#9654;: {nextName}
+      </div>
+    );
+  };
 
   return (
     <div className={`app-shell ${isTimeOverAlert ? 'time-over-flash' : ''}`}>
@@ -350,6 +447,12 @@ export default function App() {
         <h1 className="app-title">
           <span className="accent-green">[{'>'}{'>'}]</span> MISSION_MGMNT_SYS <span className="app-subtitle">[SYS_CTRL_v3.00_GAME_MODE]</span>
         </h1>
+        {/* 機能A: 年月日＋曜日 */}
+        <div className="header-date-bar">
+          <span className="header-date-text" style={{ color: dayColor }}>
+            {year}年{month}月{day}日（{dayName}）
+          </span>
+        </div>
         <div className="header-right">
           <div className="fish-ctrl">
             <button type="button" className="fish-btn" onClick={() => setAquariumSpawn(n => n + 1)}>▶ SPAWN</button>
@@ -525,34 +628,47 @@ export default function App() {
         </aside>
       </div>
 
-      {/* ROSTER SECTION */}
-      {result && (
-        <div className="cyber-panel roster-panel">
+      {/* 機能B+C: ROSTER SECTION — 常時表示、鮮度バッジ、前/次キャプション */}
+      <div className={`cyber-panel roster-panel${isResultStale ? ' roster-panel--stale' : ''}`}>
+        <div className="roster-header">
           <h2 className="panel-heading panel-heading--cyan">:: DAILY ALLOCATION ROSTER [本日のアサイン結果]</h2>
-          <div className="roster-grid">
-            <div className="roster-card">
-              <h3 className="roster-title">ASSEMBLY (1名)</h3>
-              <div className="roster-names">
-                <div className="roster-name roster-highlight"><span style={{color: '#fff'}}>[!]</span> {result.assembly?.[0] ? displayResultName(result.assembly[0]) : '---'}</div>
+          {renderFreshnessBadge()}
+        </div>
+        <div className="roster-grid">
+          {/* ASSEMBLY */}
+          <div className="roster-card">
+            <h3 className="roster-title">ASSEMBLY (1名)</h3>
+            <div className="roster-names">
+              <div className="roster-name roster-highlight">
+                <span style={{ color: '#fff' }}>[!]</span> {result?.assembly?.[0] ? displayResultName(result.assembly[0]) : '---'}
               </div>
             </div>
-            <div className="roster-card">
-              <h3 className="roster-title">REPORT (2名)</h3>
-              <div className="roster-names">
-                {result.report?.map(op => <div key={op.id} className="roster-name roster-highlight"><span style={{color: '#fff'}}>[{'>'}{'>'}]</span> {displayResultName(op)}</div>)}
-                {result.report?.length === 0 && <div className="roster-name" style={{ color: '#2c3b47' }}>---</div>}
-              </div>
+            {renderPrevNext('ASSEMBLY')}
+          </div>
+          {/* REPORT */}
+          <div className="roster-card">
+            <h3 className="roster-title">REPORT (2名)</h3>
+            <div className="roster-names">
+              {result?.report?.length > 0
+                ? result.report.map(op => <div key={op.id} className="roster-name roster-highlight"><span style={{ color: '#fff' }}>[{'>'}{'>'}]</span> {displayResultName(op)}</div>)
+                : <div className="roster-name" style={{ color: '#2c3b47' }}>---</div>
+              }
             </div>
-            <div className="roster-card">
-              <h3 className="roster-title">FEEDBACK (2名)</h3>
-              <div className="roster-names">
-                {result.feedback?.map(op => <div key={op.id} className="roster-name roster-highlight"><span style={{color: '#fff'}}>[{'>'}{'>'}]</span> {displayResultName(op)}</div>)}
-                {result.feedback?.length === 0 && <div className="roster-name" style={{ color: '#2c3b47' }}>---</div>}
-              </div>
+            {renderPrevNext('REPORT')}
+          </div>
+          {/* FEEDBACK */}
+          <div className="roster-card">
+            <h3 className="roster-title">FEEDBACK (2名)</h3>
+            <div className="roster-names">
+              {result?.feedback?.length > 0
+                ? result.feedback.map(op => <div key={op.id} className="roster-name roster-highlight"><span style={{ color: '#fff' }}>[{'>'}{'>'}]</span> {displayResultName(op)}</div>)
+                : <div className="roster-name" style={{ color: '#2c3b47' }}>---</div>
+              }
             </div>
+            {renderPrevNext('FEEDBACK')}
           </div>
         </div>
-      )}
+      </div>
 
       {/* CONTROLS */}
       <div className="controls-grid">

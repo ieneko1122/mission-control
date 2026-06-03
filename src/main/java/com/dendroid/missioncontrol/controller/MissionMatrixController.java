@@ -53,6 +53,10 @@ public class MissionMatrixController {
             Long nextFeedbackOperatorId
     ) {}
 
+    public record RotationInfoDTO(String type, OperatorDTO previous, OperatorDTO next) {}
+
+    public record LastResultWithMetaDTO(String assignedDate, String createdAt, List<MissionAssignmentDTO> assignments) {}
+
     // -------------------------------------------------------------
     // ENDPOINT 1: システム状態の取得
     // -------------------------------------------------------------
@@ -76,10 +80,10 @@ public class MissionMatrixController {
     }
 
     // -------------------------------------------------------------
-    // ENDPOINT 1b: 直前の割当結果を取得（ロールバック後の復元用）
+    // ENDPOINT 1b: 直前の割当結果を取得（日付メタ付き）
     // -------------------------------------------------------------
     @GetMapping("/missions/last-result")
-    public List<MissionAssignmentDTO> getLastResult() {
+    public LastResultWithMetaDTO getLastResult() {
         return missionLogRepository.findFirstByIsInterruptFalseOrderByIdDesc()
                 .map(lastLog -> {
                     List<MissionLog> batch = missionLogRepository.findByCreatedAt(lastLog.getCreatedAt());
@@ -88,7 +92,7 @@ public class MissionMatrixController {
                                     MissionLog::getMissionType,
                                     Collectors.mapping(MissionLog::getOperator, Collectors.toList())
                             ));
-                    return grouped.entrySet().stream()
+                    List<MissionAssignmentDTO> assignments = grouped.entrySet().stream()
                             .map(e -> new MissionAssignmentDTO(
                                     e.getKey().name(),
                                     e.getValue().stream()
@@ -96,8 +100,56 @@ public class MissionMatrixController {
                                             .toList()
                             ))
                             .toList();
+                    return new LastResultWithMetaDTO(
+                            lastLog.getAssignedDate().toString(),
+                            lastLog.getCreatedAt().toString(),
+                            assignments
+                    );
                 })
-                .orElse(List.of());
+                .orElse(new LastResultWithMetaDTO(null, null, List.of()));
+    }
+
+    // -------------------------------------------------------------
+    // ENDPOINT 1c: ローテーション情報（前/次の担当者）
+    // -------------------------------------------------------------
+    @GetMapping("/missions/rotation")
+    public List<RotationInfoDTO> getRotation() {
+        List<Operator> allOps = operatorRepository.findAllByOrderByDisplayOrderAsc();
+        List<RotationInfoDTO> rotations = new java.util.ArrayList<>();
+
+        for (MissionType type : MissionType.values()) {
+            Optional<MissionLog> lastLog = missionLogRepository.findFirstByMissionTypeAndIsInterruptFalseOrderByIdDesc(type);
+
+            OperatorDTO previous = lastLog.map(log -> {
+                Operator op = log.getOperator();
+                return new OperatorDTO(op.getId(), op.getName(), op.getNameKanji(), op.getDisplayOrder());
+            }).orElse(null);
+
+            int lastDisplayOrder = lastLog.map(log -> log.getOperator().getDisplayOrder()).orElse(0);
+
+            Operator nextOp = null;
+            if (!allOps.isEmpty()) {
+                if (lastLog.isEmpty()) {
+                    nextOp = allOps.get(0);
+                } else {
+                    int foundIdx = -1;
+                    for (int i = 0; i < allOps.size(); i++) {
+                        if (allOps.get(i).getDisplayOrder() == lastDisplayOrder) {
+                            foundIdx = i;
+                            break;
+                        }
+                    }
+                    nextOp = foundIdx >= 0 ? allOps.get((foundIdx + 1) % allOps.size()) : allOps.get(0);
+                }
+            }
+
+            OperatorDTO next = nextOp == null ? null :
+                    new OperatorDTO(nextOp.getId(), nextOp.getName(), nextOp.getNameKanji(), nextOp.getDisplayOrder());
+
+            rotations.add(new RotationInfoDTO(type.name(), previous, next));
+        }
+
+        return rotations;
     }
 
     // -------------------------------------------------------------
