@@ -437,7 +437,6 @@ export default function App() {
           <span className="prevnext-label">&#9664; 前回</span>
           <span className="prevnext-name">{prevName}</span>
         </span>
-        <span className="prevnext-divider">/</span>
         <span className="prevnext-item prevnext-item--next" title={`次回: ${nextName}`}>
           <span className="prevnext-label">次回 &#9654;</span>
           <span className="prevnext-name">{nextName}</span>
