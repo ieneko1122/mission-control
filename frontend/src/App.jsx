@@ -295,6 +295,16 @@ export default function App() {
     return displayName(fresh ?? resultOp);
   };
 
+  // 出席カードに表示する役割アイコン（ROSTERヘッダと同一の ◆▣◉）
+  const getRoleIcons = (opId) => {
+    if (!result) return [];
+    const icons = [];
+    if (result.assembly?.some(o => o.id === opId)) icons.push({ key: 'a', char: '◆', cls: 'roster-icon--assembly' });
+    if (result.report?.some(o => o.id === opId)) icons.push({ key: 'r', char: '▣', cls: 'roster-icon--report' });
+    if (result.feedback?.some(o => o.id === opId)) icons.push({ key: 'f', char: '◉', cls: 'roster-icon--feedback' });
+    return icons;
+  };
+
   const toggleAttendance = (id) => {
     setPresentIds(prev => prev.includes(id) ? prev.filter(pId => pId !== id) : [...prev, id]);
   };
@@ -501,6 +511,14 @@ export default function App() {
                   <div key={op.id} className={`operator-card ${isPresent ? 'present' : 'absent'}`} onClick={() => toggleAttendance(op.id)}>
                     <div className="op-id">ID:{String(op.displayOrder).padStart(2, '0')}</div>
                     <div className="op-name">{displayName(op)}</div>
+                    {(() => {
+                      const icons = getRoleIcons(op.id);
+                      return icons.length > 0 ? (
+                        <div className="op-role-icons">
+                          {icons.map(ic => <span key={ic.key} className={`roster-icon ${ic.cls}`}>{ic.char}</span>)}
+                        </div>
+                      ) : null;
+                    })()}
                     <div className="op-status">{isPresent ? '▶ INSERTED' : '▷ EMPTY'}</div>
                   </div>
                 );
@@ -634,6 +652,7 @@ export default function App() {
 
       {/* 機能B+C: ROSTER SECTION — 常時表示、鮮度バッジ、前/次キャプション */}
       <div className={`cyber-panel roster-panel${isResultStale ? ' roster-panel--stale' : ''}`}>
+        <div className="roster-scanline" aria-hidden="true" />
         <div className="roster-header">
           <h2 className="panel-heading panel-heading--cyan">:: DAILY ALLOCATION ROSTER</h2>
           {renderFreshnessBadge()}
@@ -675,7 +694,8 @@ export default function App() {
       {/* CONTROLS */}
       <div className="controls-grid">
         <button type="button" className="cyber-btn main-btn" onClick={triggerAllocation}>
-          <span className="btn-led btn-led--green" /> :: RUN ALLOCATION SEQUENCE ::
+          <span className="main-btn__row"><span className="btn-led btn-led--green" /> :: RUN ALLOCATION SEQUENCE ::</span>
+          <span className="main-btn__sub">[ EXECUTE DAILY ROTATION MATRIX ]</span>
         </button>
         <button type="button" className="cyber-btn cyber-btn--warn" onClick={() => setShowAdmin(true)}>
           <span className="btn-led btn-led--orange" /> EMERGENCY PROTOCOL
