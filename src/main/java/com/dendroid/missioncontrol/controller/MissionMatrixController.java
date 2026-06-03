@@ -116,40 +116,50 @@ public class MissionMatrixController {
     public List<RotationInfoDTO> getRotation() {
         List<Operator> allOps = operatorRepository.findAllByOrderByDisplayOrderAsc();
         List<RotationInfoDTO> rotations = new java.util.ArrayList<>();
+        int size = allOps.size();
 
         for (MissionType type : MissionType.values()) {
+            // 直近バッチの「最後の人」（= isInterrupt=false の最新ログ。次回ポインターの起点）
             Optional<MissionLog> lastLog = missionLogRepository.findFirstByMissionTypeAndIsInterruptFalseOrderByIdDesc(type);
 
-            OperatorDTO previous = lastLog.map(log -> {
-                Operator op = log.getOperator();
-                return new OperatorDTO(op.getId(), op.getName(), op.getNameKanji(), op.getDisplayOrder());
-            }).orElse(null);
+            OperatorDTO previous = null;
+            OperatorDTO next = null;
 
-            int lastDisplayOrder = lastLog.map(log -> log.getOperator().getDisplayOrder()).orElse(0);
-
-            Operator nextOp = null;
-            if (!allOps.isEmpty()) {
+            if (size > 0) {
                 if (lastLog.isEmpty()) {
-                    nextOp = allOps.get(0);
+                    // まだ一度も割当が無い → 前回は無し、次回はリング先頭
+                    next = toDTO(allOps.get(0));
                 } else {
-                    int foundIdx = -1;
-                    for (int i = 0; i < allOps.size(); i++) {
-                        if (allOps.get(i).getDisplayOrder() == lastDisplayOrder) {
-                            foundIdx = i;
+                    int lastOrder = lastLog.get().getOperator().getDisplayOrder();
+                    int idxLast = 0;
+                    for (int i = 0; i < size; i++) {
+                        if (allOps.get(i).getDisplayOrder() == lastOrder) {
+                            idxLast = i;
                             break;
                         }
                     }
-                    nextOp = foundIdx >= 0 ? allOps.get((foundIdx + 1) % allOps.size()) : allOps.get(0);
+                    int slots = type.getRequiredSlots();
+
+                    // 次回 = 直近バッチの最後の人の「次」（= 次バッチの1人目 / 今日の直後の人）
+                    int nextIdx = (idxLast + 1) % size;
+                    next = toDTO(allOps.get(nextIdx));
+
+                    // 前回 = 直近バッチ開始位置の「1つ前」（= 前バッチの最後の人 / 今日の直前の人）
+                    //   直近バッチは [idxLast - slots + 1 .. idxLast] を占有するので、
+                    //   その直前 = idxLast - slots。これは「次回」と対称で、リング上の連続した流れになる。
+                    int prevIdx = (((idxLast - slots) % size) + size) % size;
+                    previous = toDTO(allOps.get(prevIdx));
                 }
             }
-
-            OperatorDTO next = nextOp == null ? null :
-                    new OperatorDTO(nextOp.getId(), nextOp.getName(), nextOp.getNameKanji(), nextOp.getDisplayOrder());
 
             rotations.add(new RotationInfoDTO(type.name(), previous, next));
         }
 
         return rotations;
+    }
+
+    private OperatorDTO toDTO(Operator op) {
+        return new OperatorDTO(op.getId(), op.getName(), op.getNameKanji(), op.getDisplayOrder());
     }
 
     // -------------------------------------------------------------
