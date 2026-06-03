@@ -175,9 +175,7 @@ body {
   color: #00ffaa;
   letter-spacing: 1px;
   padding-bottom: 3px;
-  border-bottom: 1px solid transparent;
-  /* 見出し色に追従して左から右へフェードする下線（データライン風） */
-  border-image: linear-gradient(90deg, currentColor 0%, currentColor 35%, transparent 100%) 1;
+  border-bottom: 1px solid currentColor;
 }
 
 .panel-heading--danger { color: #ff3366; }
@@ -213,16 +211,10 @@ body {
 .btn-led--green {
   background: #00ffaa;
   box-shadow: 0 0 7px #00ffaa;
-  animation: led-pulse 1.4s ease-in-out infinite;
 }
 .btn-led--orange {
   background: #ff9900;
   box-shadow: 0 0 7px #ff9900;
-  animation: led-pulse 1.4s ease-in-out infinite;
-}
-@keyframes led-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
 }
 
 body::before {
@@ -245,7 +237,7 @@ body::before {
 }
 
 .cyber-panel {
-  border: 2px solid #1a2936;
+  border: 2px solid #00cc88;
   background: #080c12;
   box-shadow: 3px 3px 0px #0b121a;
   padding: 6px 8px;
@@ -516,15 +508,16 @@ body::before {
   gap: 6px;
 }
 
+/* FIELD OPS を縦に伸ばす */
 .side-deck__block--ops {
   border-color: #2a3a4a;
-  flex: 0 0 auto;
+  flex: 1 1 0;
   justify-content: center;
 }
 
-/* SHIFT LOAD 側を主役に伸ばす */
+/* SHIFT LOAD は内容ぶんの高さに（上下を短く） */
 .side-deck__block:not(.side-deck__block--ops) {
-  flex: 1;
+  flex: 0 0 auto;
 }
 
 .side-deck__heading {
@@ -532,8 +525,7 @@ body::before {
   color: #00ffaa;
   letter-spacing: 0.5px;
   padding-bottom: 2px;
-  border-bottom: 1px solid transparent;
-  border-image: linear-gradient(90deg, currentColor 0%, currentColor 35%, transparent 100%) 1;
+  border-bottom: 1px solid currentColor;
 }
 
 .side-deck__meta {
@@ -642,12 +634,10 @@ body::before {
 .shift-actions-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-auto-rows: 1fr;
-  align-items: center;
-  gap: 5px;
-  flex: 1;
-  min-height: 0;
-  margin-top: 2px;
+  grid-auto-rows: auto;
+  align-items: start;
+  gap: 4px;
+  margin-top: 4px;
 }
 
 .shift-actions-grid .retro-mini-btn {
@@ -921,14 +911,13 @@ body::before {
   box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-/* 稼働インジケーター（点滅ドット = 動いている時計だと示す） */
+/* 稼働インジケーター（常時点灯・点滅なし） */
 .clock-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: #ff9900;
   box-shadow: 0 0 6px #ff9900;
-  animation: clock-blink 1s step-end infinite;
 }
 
 .clock-digits {
@@ -938,11 +927,6 @@ body::before {
   letter-spacing: 2px;
   color: #ff9900;
   text-shadow: 0 0 8px rgba(255, 153, 0, 0.6);
-}
-
-@keyframes clock-blink {
-  0%, 50% { opacity: 1; }
-  50.01%, 100% { opacity: 0.25; }
 }
 
 .retro-badge-cyan {
@@ -1345,5 +1329,7 @@ body::before {
 @keyframes retro-twitch { 0% { transform: translate(1px, 0); } 50% { transform: translate(-1px, 1px); } 100% { transform: translate(0, -1px); } }
 .blinking-cursor { animation: blink 1s step-end infinite; }
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+/* ログ入力待ち: 点滅せず緑のブロックを常時表示 */
+.log-cursor { color: #00ffaa; }
 .roster-highlight { animation: breath-glow 2s infinite alternate ease-in-out; }
 @keyframes breath-glow { 0% { text-shadow: 0 0 2px #00ffff; color: #ccffff; } 100% { text-shadow: 0 0 8px #00ffff, 0 0 15px #00ffff; color: #ffffff; } }

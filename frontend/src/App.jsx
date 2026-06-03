@@ -644,7 +644,7 @@ export default function App() {
               ))}
             </div>
             <div className="log-panel__prompt">
-              C:\SYS\_<span className="blinking-cursor">█</span>
+              C:\SYS\_<span className="log-cursor">█</span>
             </div>
           </div>
         </aside>
@@ -706,7 +706,6 @@ export default function App() {
         <span className="footer-right">
           <span className="footer-metric">PRESENT <b>{presentIds.length}/{operators.length}</b></span>
           <span className="footer-metric">OPS <b>{opsCount}</b></span>
-          <span className="blinking-cursor accent-orange">█</span>
         </span>
       </footer>
 
