@@ -947,22 +947,22 @@ body::before {
   flex-direction: column;
   overflow: hidden;
 }
-.roster-title { margin: 0 0 2px 0; font-size: 11px; color: #00ffff; border-bottom: 1px dotted rgba(0,255,255,0.3); padding-bottom: 2px; flex-shrink: 0; }
+.roster-title { margin: 0 0 2px 0; font-size: 10px; color: #00ffff; border-bottom: 1px dotted rgba(0,255,255,0.3); padding-bottom: 2px; flex-shrink: 0; }
 .roster-names {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
 }
 .roster-name {
   display: flex;
   align-items: center;
-  font-size: clamp(13px, 1.2vw, 16px);
+  font-size: clamp(11px, 1vw, 14px);
   color: #fff;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.2;
   letter-spacing: 0.5px;
   min-width: 0;
 }
@@ -970,13 +970,13 @@ body::before {
 /* 出席カードの ID:NN と統一した、確定者IDタグ（情報密度UP） */
 .roster-op-id {
   flex-shrink: 0;
-  font-size: 9px;
+  font-size: 8px;
   font-weight: bold;
   color: #1cd0e6;
   background: #021a22;
   border: 1px solid #0c4a5a;
-  padding: 1px 4px;
-  margin-right: 7px;
+  padding: 1px 3px;
+  margin-right: 6px;
   letter-spacing: 0.5px;
   border-radius: 1px;
 }
@@ -996,11 +996,11 @@ body::before {
 
 /* スロット数バッジ ×1 / ×2 */
 .roster-slot {
-  font-size: 10px;
+  font-size: 9px;
   color: #ff9900;
   border: 1px solid #5a3a00;
   background: #1a1000;
-  padding: 0 4px;
+  padding: 0 3px;
   margin-left: 4px;
   vertical-align: middle;
   letter-spacing: 0.5px;
@@ -1008,8 +1008,8 @@ body::before {
 
 /* ROSTERヘッダのミッション種別アイコン（旧 朝/報/F の代替） */
 .roster-icon {
-  margin-right: 6px;
-  font-size: 12px;
+  margin-right: 5px;
+  font-size: 10px;
   vertical-align: middle;
   line-height: 1;
 }
@@ -1297,14 +1297,14 @@ body::before {
 
 .prevnext-label {
   font-family: var(--font-jp);
-  font-size: 9px;
+  font-size: 8px;
   letter-spacing: 0.5px;
   flex-shrink: 0;
 }
 
 .prevnext-name {
   font-family: var(--font-name);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.3px;
   white-space: nowrap;
