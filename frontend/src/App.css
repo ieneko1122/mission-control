@@ -58,7 +58,8 @@ body {
   }
 
   .dashboard-grid {
-    grid-template-columns: minmax(0, 1.2fr) minmax(215px, 260px) minmax(260px, 320px);
+    /* attendance:side-deck:sidebar ≈ 626:310:380 @ 1920px (attendance = prev×0.85) */
+    grid-template-columns: minmax(0, 1.2fr) minmax(215px, 310px) minmax(260px, 380px);
   }
 }
 
