@@ -240,7 +240,7 @@ body::before {
   border: 2px solid #00cc88;
   background: #080c12;
   box-shadow: 3px 3px 0px #0b121a;
-  padding: 6px 8px;
+  padding: 9px 12px;
   position: relative;
 }
 
@@ -337,13 +337,13 @@ body::before {
 .panel-timer {
   border-color: #ff3366;
   background: rgba(20, 5, 10, 0.95);
-  padding: 8px;
+  padding: 9px 11px;
 }
 
 .panel-queue {
   border-color: #ff9900;
   color: #ff9900;
-  padding: 8px;
+  padding: 9px 11px;
 }
 
 .timer-display {
@@ -423,7 +423,7 @@ body::before {
 
 .log-panel {
   background: #020305;
-  padding: 8px;
+  padding: 9px 11px;
   display: flex;
   flex-direction: column;
   min-height: 88px;
@@ -497,15 +497,16 @@ body::before {
   flex-direction: column;
   gap: 8px;
   min-width: 0;
+  padding: 7px;
 }
 
 .side-deck__block {
   border: 1px dashed #1d4a3a;
   background: #040a0e;
-  padding: 8px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 /* FIELD OPS を縦に伸ばす */
@@ -682,7 +683,7 @@ body::before {
 .operator-card {
   border: 2px solid #223344;
   background: #0c121a;
-  padding: 6px 4px;
+  padding: 9px 6px;
   text-align: center;
   cursor: pointer;
   user-select: none;
@@ -693,7 +694,7 @@ body::before {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 2px;
+  gap: 5px;
   transition: border-color 0.1s, box-shadow 0.1s;
 }
 
@@ -942,12 +943,12 @@ body::before {
 .roster-card {
   border: 1px dashed #00ffff;
   background: #00111a;
-  padding: 5px 8px;
+  padding: 8px 11px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
-.roster-title { margin: 0 0 2px 0; font-size: 11px; color: #00ffff; border-bottom: 1px dotted rgba(0,255,255,0.3); padding-bottom: 2px; flex-shrink: 0; }
+.roster-title { margin: 0 0 5px 0; font-size: 11px; color: #00ffff; border-bottom: 1px dotted rgba(0,255,255,0.3); padding-bottom: 4px; flex-shrink: 0; }
 .roster-names {
   flex: 1;
   min-height: 0;
