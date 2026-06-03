@@ -138,16 +138,20 @@ public class MissionMatrixController {
                             break;
                         }
                     }
-                    int slots = type.getRequiredSlots();
-
                     // 次回 = 直近バッチの最後の人の「次」（= 次バッチの1人目 / 今日の直後の人）
                     int nextIdx = (idxLast + 1) % size;
                     next = toDTO(allOps.get(nextIdx));
 
-                    // 前回 = 直近バッチ開始位置の「1つ前」（= 前バッチの最後の人 / 今日の直前の人）
-                    //   直近バッチは [idxLast - slots + 1 .. idxLast] を占有するので、
-                    //   その直前 = idxLast - slots。これは「次回」と対称で、リング上の連続した流れになる。
-                    int prevIdx = (((idxLast - slots) % size) + size) % size;
+                    // 前回 = 直近の「通常ローテバッチ」開始位置の1つ前（= 前回ローテの最後の人 / 直前の人）。
+                    //   割り込み(isInterrupt=true)はポインターを進めない設計なので、
+                    //   getRequiredSlots() ではなく「そのバッチで実際に進んだ通常枠の人数」だけ巻き戻す。
+                    //   これにより欠席明け割り込みがあっても前回表示が1人ズレない。
+                    java.time.LocalDateTime batchAt = lastLog.get().getCreatedAt();
+                    long normalCount = missionLogRepository.findByCreatedAt(batchAt).stream()
+                            .filter(l -> l.getMissionType() == type && !l.isInterrupt())
+                            .count();
+                    if (normalCount < 1) normalCount = 1; // 念のためのガード
+                    int prevIdx = (int) ((((idxLast - normalCount) % size) + size) % size);
                     previous = toDTO(allOps.get(prevIdx));
                 }
             }
