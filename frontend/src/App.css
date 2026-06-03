@@ -5,8 +5,8 @@
   /* レトロフォント */
   --font-pixel: 'Press Start 2P', 'Courier New', monospace;            /* 大きい英字・数字（ピクセル） */
   --font-mono: 'Courier New', Courier, monospace;                       /* 小さい英字（LOG/見出し） */
-  --font-jp: 'Noto Sans JP', sans-serif;                                /* 標準的なWeb日本語ゴシック */
-  --font-name: 'Courier New', 'Noto Sans JP', sans-serif;               /* 名前: 英字=Courier(LOG同様) / 漢字=Noto Sans JP */
+  --font-jp: 'Courier New', Courier, monospace;                         /* タイトル/日付以外は全てCourierへ統一 */
+  --font-name: 'Courier New', Courier, monospace;                       /* 名前も Courier（漢字はシステムfallback） */
 }
 
 *,
@@ -82,7 +82,7 @@ body {
   gap: 2px 12px;
   border-bottom: 3px double #00ffaa;
   padding-bottom: 3px;
-  margin-bottom: 6px;
+  margin-bottom: 9px;
 }
 
 .app-title {
@@ -153,9 +153,9 @@ body {
   /* attendance 1fr : (side-deck+sidebar) 1fr → attendance ≈ コンテナの半分 = 右端が画面中央付近。
      DPI拡大率でCSS幅が1200px未満になり ≥1200 のメディアクエリが効かない環境でもこのルールで中央寄せになる。 */
   grid-template-columns: minmax(0, 1fr) minmax(160px, 0.45fr) minmax(200px, 0.55fr);
-  gap: 10px;
+  gap: 12px;
   align-items: stretch;
-  /* 縦の余白配分: 出席グリッド : ROSTER : SEQUENCE = 5 : 2.3 : 0.95 */
+  /* 縦の余白配分: 出席グリッド : ROSTER : SEQUENCE */
   flex: 5 1 0;
   min-height: 0;
 }
@@ -163,7 +163,7 @@ body {
 .dashboard-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 7px;
   min-width: 0;
   min-height: 0;
   height: 100%;
@@ -187,17 +187,15 @@ body {
 .controls-grid {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 12px;
+  margin-top: 13px;
   align-items: stretch;
-  flex: 0.78 1 0;
+  flex: 0.68 1 0;
   min-height: 0;
 }
 
 .cyber-btn--warn {
-  font-family: var(--font-pixel);
-  font-size: 11px;
-  letter-spacing: 0;
+  font-size: 12px;
   border-color: #ff9900;
   color: #ff9900;
   white-space: nowrap;
@@ -247,7 +245,7 @@ body::before {
 }
 
 .cyber-panel {
-  border: 2px solid #33495e;
+  border: 2px solid #1a2936;
   background: #080c12;
   box-shadow: 3px 3px 0px #0b121a;
   padding: 6px 8px;
@@ -322,9 +320,7 @@ body::before {
 }
 
 .cyber-btn.main-btn {
-  font-family: var(--font-pixel);
-  font-size: 12px;
-  letter-spacing: 0;
+  font-size: 13px;
   background: #002211;
   border-width: 3px;
 }
@@ -359,11 +355,11 @@ body::before {
 }
 
 .timer-display {
-  font-size: 14px;
-  font-weight: 400;
+  font-size: 16px;
+  font-weight: bold;
   text-align: center;
   color: #555;
-  font-family: var(--font-pixel);
+  font-family: var(--font-mono);
   letter-spacing: 1px;
   margin: 2px 0 6px 0;
   text-shadow: none;
@@ -496,7 +492,7 @@ body::before {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-template-rows: repeat(3, 1fr);
-  gap: 10px;
+  gap: 12px;
   flex: 1;
   min-width: 0;
   min-height: 0;
@@ -507,12 +503,12 @@ body::before {
 .side-deck {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   min-width: 0;
 }
 
 .side-deck__block {
-  border: 1px dashed #2f6b54;
+  border: 1px dashed #1d4a3a;
   background: #040a0e;
   padding: 8px;
   display: flex;
@@ -521,7 +517,7 @@ body::before {
 }
 
 .side-deck__block--ops {
-  border-color: #3c5266;
+  border-color: #2a3a4a;
   flex: 0 0 auto;
   justify-content: center;
 }
@@ -668,13 +664,14 @@ body::before {
 }
 
 .ops-counter-value {
-  font-family: var(--font-pixel);
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 1.1;
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
   text-align: center;
   color: #00ffaa;
   text-shadow: 0 0 10px rgba(0, 255, 170, 0.5);
+  font-variant-numeric: tabular-nums;
 }
 
 .ops-counter-rank {
@@ -743,7 +740,7 @@ body::before {
 .attendance-toolbar {
   margin-top: 4px;
   padding: 4px 6px;
-  border: 1px dashed #2c5468;
+  border: 1px dashed #1d3b4a;
   background: #050b10;
   display: flex;
   justify-content: space-between;
@@ -766,9 +763,9 @@ body::before {
 
 .roster-panel {
   border-color: #00ffff;
-  margin-top: 8px;
+  margin-top: 13px;
   box-shadow: 0 0 15px rgba(0, 255, 255, 0.15);
-  flex: 1.6 1 0;
+  flex: 1.45 1 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -780,7 +777,7 @@ body::before {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-auto-rows: 1fr;
-  gap: 8px;
+  gap: 11px;
   flex: 1;
   min-height: 0;
   margin-top: 4px;
@@ -935,10 +932,10 @@ body::before {
 }
 
 .clock-digits {
-  font-family: var(--font-pixel);
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 1px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 2px;
   color: #ff9900;
   text-shadow: 0 0 8px rgba(255, 153, 0, 0.6);
 }
