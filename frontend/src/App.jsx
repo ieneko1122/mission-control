@@ -87,9 +87,9 @@ export default function App() {
 
   // 機能A: 日付・曜日計算
   const todayDate = new Date();
-  const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+  const dayNamesEn = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   const dayOfWeek = todayDate.getDay();
-  const dayName = dayNames[dayOfWeek];
+  const dayNameEn = dayNamesEn[dayOfWeek];
   const dayColor = dayOfWeek === 0 ? '#ff3366' : dayOfWeek === 6 ? '#00ccff' : '#00ffaa';
   const year = todayDate.getFullYear();
   const month = todayDate.getMonth() + 1;
@@ -412,15 +412,15 @@ export default function App() {
     const dateLabel = lastResultMeta?.assignedDate
       ? (() => {
           const d = new Date(lastResultMeta.assignedDate + 'T00:00:00');
-          return `${d.getMonth() + 1}/${d.getDate()}`;
+          return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         })()
       : null;
     if (isToday) {
-      return <span className="freshness-pill freshness-pill--ok">&#10003; 本日確定（{dateLabel}）</span>;
+      return <span className="freshness-pill freshness-pill--ok">&#10003; CONFIRMED {dateLabel}</span>;
     }
     return (
       <span className="freshness-pill freshness-pill--warn">
-        &#9888; 本日未実行{dateLabel ? `（前回: ${dateLabel}）` : ''}
+        &#9888; NOT RUN{dateLabel ? ` · LAST ${dateLabel}` : ''}
       </span>
     );
   };
@@ -454,10 +454,12 @@ export default function App() {
         <h1 className="app-title">
           <span className="accent-green">[{'>'}{'>'}]</span> MISSION_MGMNT_SYS <span className="app-subtitle">[SYS_CTRL_v3.00_GAME_MODE]</span>
         </h1>
-        {/* 機能A: 年月日＋曜日 */}
+        {/* 機能A: 曜日 // ISO日付（WED // 2026-06-03） */}
         <div className="header-date-bar">
-          <span className="header-date-text" style={{ color: dayColor }}>
-            {year}年{month}月{day}日（{dayName}）
+          <span className="header-date-text">
+            <span className="header-dow" style={{ color: dayColor }}>{dayNameEn}</span>
+            <span className="header-date-sep"> // </span>
+            <span className="header-date-iso">{todayStr}</span>
           </span>
         </div>
         <div className="header-right">
@@ -466,7 +468,7 @@ export default function App() {
             <button type="button" className="fish-btn fish-btn--clr" onClick={() => setAquariumClear(n => n + 1)}>✕ CLR</button>
           </div>
           <div className="retro-clock">
-            1P-TIME <span className="accent-orange">{currentTime}</span>
+            TIME <span className="accent-orange">{currentTime}</span>
           </div>
         </div>
       </header>
@@ -476,7 +478,7 @@ export default function App() {
         {/* LEFT COLUMN: ATTENDANCE */}
         <div className="cyber-panel attendance-panel">
           <div>
-            <h2 className="panel-heading">:: OPERATORS ATTENDANCE [オペレーター出席状況]</h2>
+            <h2 className="panel-heading">:: OPERATORS ATTENDANCE</h2>
             <div className="attendance-toolbar">
               <div className="attendance-metrics">
                 <span className="retro-badge-cyan">PRESENT {presentIds.length}</span>
@@ -515,7 +517,7 @@ export default function App() {
         {/* CENTER COLUMN: SHIFT & OPS */}
         <aside className="cyber-panel side-deck" aria-label="シフト状況">
           <div className="side-deck__block">
-            <div className="side-deck__heading">:: SHIFT LOAD [時間割連動]</div>
+            <div className="side-deck__heading">:: SHIFT LOAD</div>
             <div className="shift-phase-label">{activeBlock.label}</div>
             <div className={`segment-gauge ${gaugeClass}`} title={`${Math.round(shiftProgress)}%`}>
               {Array.from({ length: 10 }, (_, i) => (
@@ -543,7 +545,7 @@ export default function App() {
           </div>
 
           <div className="side-deck__block side-deck__block--ops">
-            <div className="side-deck__heading">:: FIELD OPS [巡視・対応]</div>
+            <div className="side-deck__heading">:: FIELD OPS</div>
             <div className="ops-counter-value">{opsCount}</div>
             <div className="ops-counter-rank">RANK: {opsRank}</div>
             <div className="side-deck__actions ops-counter-actions">
@@ -605,7 +607,7 @@ export default function App() {
 
           {/* INTERRUPT QUEUE */}
           <div className="cyber-panel panel-queue">
-            <h3 className="panel-heading panel-heading--warn">:: INTERRUPT QUEUE [次回優先キュー]</h3>
+            <h3 className="panel-heading panel-heading--warn">:: INTERRUPT QUEUE</h3>
             <div className="queue-line">
               <span className="queue-label">-- REPORT: </span>
               {queues.report?.map((name, i) => <span key={i} className="retro-badge-cyan">!{name}</span>)}
@@ -638,7 +640,7 @@ export default function App() {
       {/* 機能B+C: ROSTER SECTION — 常時表示、鮮度バッジ、前/次キャプション */}
       <div className={`cyber-panel roster-panel${isResultStale ? ' roster-panel--stale' : ''}`}>
         <div className="roster-header">
-          <h2 className="panel-heading panel-heading--cyan">:: DAILY ALLOCATION ROSTER [本日のアサイン結果]</h2>
+          <h2 className="panel-heading panel-heading--cyan">:: DAILY ALLOCATION ROSTER</h2>
           {renderFreshnessBadge()}
         </div>
         <div className="roster-grid">
@@ -679,9 +681,9 @@ export default function App() {
 
       {/* CONTROLS */}
       <div className="controls-grid">
-        <button type="button" className="cyber-btn main-btn" onClick={triggerAllocation}>:: RUN ALLOCATION SEQUENCE (割当実行) ::</button>
+        <button type="button" className="cyber-btn main-btn" onClick={triggerAllocation}>:: RUN ALLOCATION SEQUENCE ::</button>
         <button type="button" className="cyber-btn cyber-btn--warn" onClick={() => setShowAdmin(true)}>
-          // EMERGENCY PROTOCOL (管理者権限)
+          // EMERGENCY PROTOCOL
         </button>
       </div>
 

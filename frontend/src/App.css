@@ -158,7 +158,7 @@ body {
 
 .panel-heading--danger { color: #ff3366; }
 .panel-heading--warn { color: #ff9900; margin-bottom: 4px; }
-.panel-heading--cyan { color: #00ffff; font-size: 13px; }
+.panel-heading--cyan { color: #00ffff; font-size: 11px; }
 
 .controls-grid {
   display: grid;
@@ -238,7 +238,7 @@ body::before {
 }
 
 .cyber-btn.main-btn {
-  font-size: 16px;
+  font-size: 13px;
   background: #002211;
   border-width: 3px;
 }
@@ -892,10 +892,11 @@ body::before {
   gap: 6px;
 }
 .roster-name {
-  font-size: clamp(18px, 1.9vw, 24px);
+  font-size: clamp(14px, 1.3vw, 17px);
   color: #fff;
   font-weight: bold;
   line-height: 1.25;
+  letter-spacing: 0.5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1071,8 +1072,23 @@ body::before {
   font-size: clamp(15px, 2vw, 21px);
   font-weight: bold;
   letter-spacing: 2px;
-  text-shadow: 0 0 12px currentColor;
   font-family: 'Courier New', Courier, monospace;
+}
+
+/* 曜日: 土青/日赤/平日緑 で色分け＋発光（主役） */
+.header-dow {
+  text-shadow: 0 0 12px currentColor;
+}
+
+/* 区切り // : 控えめ */
+.header-date-sep {
+  color: #2f6b5a;
+}
+
+/* ISO日付: 緑で安定表示 */
+.header-date-iso {
+  color: #00ffaa;
+  text-shadow: 0 0 8px rgba(0, 255, 170, 0.45);
 }
 
 /* ── 機能C: 鮮度バッジ ─────────────────────────────────────────── */
