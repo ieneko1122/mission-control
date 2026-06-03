@@ -433,7 +433,15 @@ export default function App() {
     const nextName = rot.next ? displayName(rot.next) : '---';
     return (
       <div className="roster-prevnext">
-        &#9664; 前: {prevName}&#x3000;次 &#9654;: {nextName}
+        <span className="prevnext-item prevnext-item--prev" title={`前回: ${prevName}`}>
+          <span className="prevnext-label">&#9664; 前回</span>
+          <span className="prevnext-name">{prevName}</span>
+        </span>
+        <span className="prevnext-divider">/</span>
+        <span className="prevnext-item prevnext-item--next" title={`次回: ${nextName}`}>
+          <span className="prevnext-label">次回 &#9654;</span>
+          <span className="prevnext-name">{nextName}</span>
+        </span>
       </div>
     );
   };

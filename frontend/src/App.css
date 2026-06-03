@@ -1116,16 +1116,61 @@ body::before {
   filter: saturate(0.4);
 }
 
-/* ── 機能B: 前/次キャプション ──────────────────────────────────── */
+/* ── 機能B: 前/次キャプション（PREV=控えめ / NEXT=強調） ──────── */
 .roster-prevnext {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px dotted rgba(0, 255, 255, 0.18);
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.prevnext-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.prevnext-item--next {
+  margin-left: auto;
+  text-align: right;
+}
+
+.prevnext-label {
   font-size: 9px;
-  color: #6595a5;
-  margin-top: 2px;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.prevnext-name {
+  font-size: 12px;
+  font-weight: bold;
   letter-spacing: 0.3px;
-  line-height: 1.3;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+}
+
+/* PREV = 履歴なので控えめ（グレー寄り） */
+.prevnext-item--prev .prevnext-label { color: #4a6573; }
+.prevnext-item--prev .prevnext-name { color: #7fa6b5; }
+
+/* NEXT = これからの予定なので強調（明るいシアン＋発光） */
+.prevnext-item--next .prevnext-label { color: #00ccdd; }
+.prevnext-item--next .prevnext-name {
+  color: #aeffff;
+  text-shadow: 0 0 6px rgba(0, 255, 255, 0.55);
+}
+
+.prevnext-divider {
+  color: #1f4453;
+  font-size: 10px;
   flex-shrink: 0;
 }
 
