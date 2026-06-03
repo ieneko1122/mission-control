@@ -126,6 +126,19 @@ body {
 
 .footer-right {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-metric {
+  color: #5a8f7d;
+  letter-spacing: 0.5px;
+}
+
+.footer-metric b {
+  color: #00ffaa;
+  font-weight: bold;
 }
 
 .dashboard-grid {
@@ -176,6 +189,30 @@ body {
   white-space: nowrap;
 }
 
+/* CONTROLボタンの稼働ステータスLED */
+.btn-led {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.btn-led--green {
+  background: #00ffaa;
+  box-shadow: 0 0 7px #00ffaa;
+  animation: led-pulse 1.4s ease-in-out infinite;
+}
+.btn-led--orange {
+  background: #ff9900;
+  box-shadow: 0 0 7px #ff9900;
+  animation: led-pulse 1.4s ease-in-out infinite;
+}
+@keyframes led-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
 body::before {
   content: " ";
   display: block;
@@ -202,6 +239,39 @@ body::before {
   padding: 6px 8px;
   position: relative;
 }
+
+/* HUD風コーナーブラケット（左上＋右下）。端末パネル感を統一的に付与 */
+.cyber-panel::before,
+.cyber-panel::after {
+  content: "";
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  pointer-events: none;
+  border-color: #00ffaa;
+  opacity: 0.55;
+}
+.cyber-panel::before {
+  top: 2px;
+  left: 2px;
+  border-top: 1px solid;
+  border-left: 1px solid;
+}
+.cyber-panel::after {
+  bottom: 2px;
+  right: 2px;
+  border-bottom: 1px solid;
+  border-right: 1px solid;
+}
+/* パネルのテーマ色にコーナーも合わせる */
+.cyber-panel.panel-timer::before,
+.cyber-panel.panel-timer::after { border-color: #ff3366; }
+.cyber-panel.panel-queue::before,
+.cyber-panel.panel-queue::after { border-color: #ff9900; }
+.cyber-panel.roster-panel::before,
+.cyber-panel.roster-panel::after { border-color: #00ffff; }
+.cyber-panel.admin::before,
+.cyber-panel.admin::after { border-color: #ff9900; }
 
 .cyber-panel.admin {
   border: 2px double #ff9900;
@@ -1133,10 +1203,11 @@ body::before {
 }
 
 .header-date-text {
-  font-size: clamp(15px, 2vw, 21px);
-  font-weight: bold;
-  letter-spacing: 2px;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Press Start 2P', 'Courier New', Courier, monospace;
+  font-size: clamp(11px, 1.4vw, 15px);
+  font-weight: 400;
+  letter-spacing: 1px;
+  line-height: 1.4;
 }
 
 /* 曜日: 土青/日赤/平日緑 で色分け＋発光（主役） */

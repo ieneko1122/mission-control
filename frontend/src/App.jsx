@@ -689,16 +689,22 @@ export default function App() {
 
       {/* CONTROLS */}
       <div className="controls-grid">
-        <button type="button" className="cyber-btn main-btn" onClick={triggerAllocation}>:: RUN ALLOCATION SEQUENCE ::</button>
+        <button type="button" className="cyber-btn main-btn" onClick={triggerAllocation}>
+          <span className="btn-led btn-led--green" /> :: RUN ALLOCATION SEQUENCE ::
+        </button>
         <button type="button" className="cyber-btn cyber-btn--warn" onClick={() => setShowAdmin(true)}>
-          EMERGENCY PROTOCOL
+          <span className="btn-led btn-led--orange" /> EMERGENCY PROTOCOL
         </button>
       </div>
 
       <footer className="app-footer">
         <span className="footer-status"><span className="accent-green">[SYS_OK]</span> CENTRAL MATRIX ONLINE</span>
         <span className="footer-center">:: MISSION_MGMNT_SYS :: SYS_CTRL_v3.00 ::</span>
-        <span className="footer-right accent-orange">{new Date().toLocaleDateString('ja-JP')} <span className="blinking-cursor">█</span></span>
+        <span className="footer-right">
+          <span className="footer-metric">PRESENT <b>{presentIds.length}/{operators.length}</b></span>
+          <span className="footer-metric">OPS <b>{opsCount}</b></span>
+          <span className="blinking-cursor accent-orange">█</span>
+        </span>
       </footer>
 
       {showAdmin && createPortal(
