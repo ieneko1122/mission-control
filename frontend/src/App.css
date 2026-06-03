@@ -240,7 +240,7 @@ body::before {
   border: 2px solid #00cc88;
   background: #080c12;
   box-shadow: 3px 3px 0px #0b121a;
-  padding: 11px 14px;
+  padding: 17px 20px;
   position: relative;
 }
 
@@ -288,7 +288,7 @@ body::before {
   background: #091310;
   color: #00ffaa;
   border: 2px solid #00ffaa;
-  padding: 10px 16px;
+  padding: 16px 22px;
   cursor: pointer;
   font-weight: bold;
   text-transform: uppercase;
@@ -337,13 +337,13 @@ body::before {
 .panel-timer {
   border-color: #ff3366;
   background: rgba(20, 5, 10, 0.95);
-  padding: 11px 13px;
+  padding: 17px 19px;
 }
 
 .panel-queue {
   border-color: #ff9900;
   color: #ff9900;
-  padding: 11px 13px;
+  padding: 17px 19px;
 }
 
 .timer-display {
@@ -423,7 +423,7 @@ body::before {
 
 .log-panel {
   background: #020305;
-  padding: 11px 13px;
+  padding: 17px 19px;
   display: flex;
   flex-direction: column;
   min-height: 88px;
@@ -497,13 +497,13 @@ body::before {
   flex-direction: column;
   gap: 8px;
   min-width: 0;
-  padding: 9px;
+  padding: 15px;
 }
 
 .side-deck__block {
   border: 1px dashed #1d4a3a;
   background: #040a0e;
-  padding: 12px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -683,7 +683,7 @@ body::before {
 .operator-card {
   border: 2px solid #223344;
   background: #0c121a;
-  padding: 11px 8px;
+  padding: 17px 14px;
   text-align: center;
   cursor: pointer;
   user-select: none;
@@ -943,7 +943,7 @@ body::before {
 .roster-card {
   border: 1px dashed #00ffff;
   background: #00111a;
-  padding: 10px 13px;
+  padding: 16px 19px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
