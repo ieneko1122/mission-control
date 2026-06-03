@@ -652,7 +652,6 @@ export default function App() {
 
       {/* 機能B+C: ROSTER SECTION — 常時表示、鮮度バッジ、前/次キャプション */}
       <div className={`cyber-panel roster-panel${isResultStale ? ' roster-panel--stale' : ''}`}>
-        <div className="roster-scanline" aria-hidden="true" />
         <div className="roster-header">
           <h2 className="panel-heading panel-heading--cyan">:: DAILY ALLOCATION ROSTER</h2>
           {renderFreshnessBadge()}
@@ -694,8 +693,7 @@ export default function App() {
       {/* CONTROLS */}
       <div className="controls-grid">
         <button type="button" className="cyber-btn main-btn" onClick={triggerAllocation}>
-          <span className="main-btn__row"><span className="btn-led btn-led--green" /> :: RUN ALLOCATION SEQUENCE ::</span>
-          <span className="main-btn__sub">[ EXECUTE DAILY ROTATION MATRIX ]</span>
+          <span className="btn-led btn-led--green" /> :: RUN ALLOCATION SEQUENCE ::
         </button>
         <button type="button" className="cyber-btn cyber-btn--warn" onClick={() => setShowAdmin(true)}>
           <span className="btn-led btn-led--orange" /> EMERGENCY PROTOCOL
