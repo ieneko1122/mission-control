@@ -58,8 +58,8 @@ body {
   }
 
   .dashboard-grid {
-    /* attendance takes remaining 1fr; side-deck/sidebar fixed → attendance ≈ 0.85× prev */
-    grid-template-columns: minmax(0, 1fr) 310px 380px;
+    /* attendance 1fr : 右2列 1fr → 右端が画面中央付近（拡大率の低いPCでも同じ見え方に揃える） */
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 0.45fr) minmax(240px, 0.55fr);
   }
 }
 
@@ -130,7 +130,9 @@ body {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(165px, 200px) minmax(230px, 280px);
+  /* attendance 1fr : (side-deck+sidebar) 1fr → attendance ≈ コンテナの半分 = 右端が画面中央付近。
+     DPI拡大率でCSS幅が1200px未満になり ≥1200 のメディアクエリが効かない環境でもこのルールで中央寄せになる。 */
+  grid-template-columns: minmax(0, 1fr) minmax(160px, 0.45fr) minmax(200px, 0.55fr);
   gap: 10px;
   align-items: stretch;
   /* 縦の余白配分: 出席グリッド : ROSTER : SEQUENCE = 5 : 2.3 : 0.95 */
