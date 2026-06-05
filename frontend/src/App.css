@@ -813,9 +813,20 @@ body::before {
     gap: 8px;
   }
 
+  /* フッターを下部固定（中部スクロール時も常時表示）。狭幅は中央テキストを省きスリム化 */
   .app-footer {
     order: 90;
     margin-top: 0;
+    position: sticky;
+    bottom: 0;
+    z-index: 45;
+    background: #030508;
+    padding-top: 6px;
+    padding-bottom: 4px;
+  }
+
+  .footer-center {
+    display: none;
   }
 
   /* グリッド/サイドを平坦化し、内部パネルを app-shell 直下の flex 子へ昇格 */
@@ -838,8 +849,31 @@ body::before {
     margin-top: 0;
   }
 
+  /* 操作ボタンは2列で高さを節約 */
   .controls-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* 狭幅 ALLOCATION を1画面に収めやすくするため出席カードをコンパクト化 */
+  .matrix-grid {
+    gap: 8px;
+  }
+  .operator-card {
+    min-height: 42px;
+    padding: 4px 3px;
+    gap: 1px;
+  }
+  .operator-card .op-id {
+    font-size: 8px;
+  }
+  .operator-card .op-name {
+    font-size: 12px;
+  }
+  .operator-card .op-status {
+    font-size: 7px;
+  }
+  .op-role-icons .roster-icon {
+    font-size: 9px;
   }
 
   /* overflow:hidden のクリップを解除して全内容を表示 */
@@ -877,11 +911,14 @@ body::before {
     display: none;
   }
 
-  /* 狭幅の本体下部に共通ミニログを表示（フッター直前）。
+  /* 狭幅の本体下部に共通ミニログを表示（フッター直上に固定）。
      ベースの display:none(後方定義)に勝つよう詳細度を上げる */
   .app-shell .mini-log {
     display: flex;
     order: 89;
+    position: sticky;
+    bottom: 28px; /* フッター高さぶん上に固定 */
+    z-index: 44;
   }
 
   /* ALLOCATION: ATTENDANCE → ROSTER → QUEUE → CONTROLS
@@ -919,7 +956,10 @@ body::before {
   .app-shell {
     padding: 4px 4px 12px;
   }
+}
 
+/* 極狭(スマホ縦)でのみ1列化。分割幅(~600-640px)では多列を維持して縦の見切れを防ぐ */
+@media (max-width: 460px) {
   .timer-row {
     grid-template-columns: 1fr;
   }
@@ -938,15 +978,6 @@ body::before {
 
   .roster-grid {
     grid-template-columns: 1fr;
-  }
-
-  .operator-card .op-name {
-    font-size: 13px;
-  }
-
-  .operator-card {
-    min-height: 60px;
-    padding: 6px 4px;
   }
 }
 
@@ -1029,37 +1060,39 @@ body::before {
   margin: 0 0 12px;
 }
 
+/* 下線アクセント型タブ（塗りつぶし発光をやめ、控えめに） */
 .mode-tab {
   flex: 1;
   min-width: 0;
-  background: #071310;
-  border: 1px solid #1f4d3f;
-  color: #6fb89c;
+  background: rgba(7, 19, 16, 0.5);
+  border: 1px solid #143028;
+  border-bottom-width: 2px;
+  color: #5f8f7e;
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: bold;
   letter-spacing: 1px;
-  padding: 8px 6px;
+  padding: 7px 6px;
   cursor: pointer;
   text-align: center;
   text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: all 0.12s;
+  transition: color 0.12s, border-color 0.12s, background 0.12s;
 }
 
 .mode-tab:hover {
-  border-color: #00ffaa;
   color: #00ffaa;
-  box-shadow: 0 0 6px rgba(0, 255, 170, 0.2);
+  border-bottom-color: #2f6b5a;
 }
 
 .mode-tab.active {
-  background: #00ffaa;
-  color: #021109;
-  border-color: #00ffaa;
-  box-shadow: 0 0 10px rgba(0, 255, 170, 0.4);
+  color: #00ffaa;
+  background: rgba(0, 40, 28, 0.5);
+  border-color: #1f4d3f;
+  border-bottom-color: #00ffaa; /* 下線アクセントのみで主張を抑える */
+  text-shadow: 0 0 6px rgba(0, 255, 170, 0.35);
 }
 
 /* 広幅: DASHBOARD | CLOCK の2タブ（ALLOCATION/TOOLSはダッシュボードに統合され区別不要） */
@@ -1107,9 +1140,19 @@ body::before {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(6px, 1.8vh, 18px);
+  gap: clamp(8px, 2.2vh, 22px);
   text-align: center;
-  padding: clamp(8px, 2vh, 20px) 12px;
+  padding: clamp(10px, 2.4vh, 26px) 12px;
+}
+
+/* 掲示モード: 時計まわりも共通最大幅で中央寄せ（ゲージ/日直/ログは各ブロックで600pxに統一） */
+.display-clock,
+.display-date,
+.display-phase,
+.display-remaining {
+  width: min(94vw, 600px);
+  max-width: 100%;
+  align-self: center;
 }
 
 /* 大時計: ファミコン(ピクセル)フォント。幅にも収まるよう vw 連動でキャップ */
@@ -1148,7 +1191,7 @@ body::before {
 /* 大型ゲージ: 角を丸めて尖り感を抑え、縦幅は控えめに */
 .segment-gauge--xl {
   height: clamp(28px, 5vh, 52px);
-  width: min(92vw, 820px);
+  width: min(94vw, 600px);
   gap: 6px;
   margin: 0;
 }
@@ -1162,7 +1205,7 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  width: min(94vw, 560px);
+  width: min(94vw, 600px);
   padding: clamp(8px, 1.6vh, 14px) 14px;
   border: 1px solid #0c6f7d;
   background: linear-gradient(180deg, rgba(0, 30, 38, 0.7), rgba(0, 12, 18, 0.7));
@@ -1206,7 +1249,7 @@ body::before {
 
 /* CLOCK内の全文ログ（コンパクト） */
 .display-log {
-  width: min(94vw, 560px);
+  width: min(94vw, 600px);
   text-align: left;
   border: 1px solid #163a31;
   background: #020607;
