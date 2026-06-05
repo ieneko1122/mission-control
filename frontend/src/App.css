@@ -79,26 +79,19 @@ body {
   }
 }
 
+/* 全幅ヘッダー: バー自体を画面幅いっぱいに広げ、中身も端寄せ（左にタイトル・右に時計） */
 .app-header {
   position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 8px 18px;
-  padding-bottom: 8px;
+  padding: 0 clamp(14px, 2.5vw, 32px) 8px;
   margin-bottom: 12px;
-}
-
-/* 全幅ヘッダー: 背景と区切り線を画面端まで伸ばす（中身は中央寄せのまま） */
-.app-header::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  top: 0;
-  bottom: 0;
-  left: calc(50% - 50vw);
-  width: 100vw;
   background: #070b10;
   border-bottom: 3px double #00ffaa;
 }
@@ -124,29 +117,22 @@ body {
 .accent-green { color: #00ffaa; }
 .accent-orange { color: #ff9900; }
 
+/* 全幅フッター: バー自体を画面幅いっぱいに広げ、中身も端寄せ */
 .app-footer {
   position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  padding-top: 8px;
+  padding: 8px clamp(14px, 2.5vw, 32px) 0;
   margin-top: 20px;
   font-size: 10px;
   letter-spacing: 1px;
   color: #336655;
   flex-shrink: 0;
-}
-
-/* 全幅フッター: 背景と区切り線を画面端まで伸ばす（中身は中央寄せのまま） */
-.app-footer::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  top: 0;
-  bottom: 0;
-  left: calc(50% - 50vw);
-  width: 100vw;
   background: #070b10;
   border-top: 3px double #00ffaa;
 }
@@ -997,6 +983,18 @@ body::before {
   .app-shell[data-mode="tools"] .panel-timer { order: 1; }
   .app-shell[data-mode="tools"] .side-deck__block:not(.side-deck__block--ops) { order: 2; }
   .app-shell[data-mode="tools"] .side-deck__block--ops { order: 3; }
+
+  /* 狭幅CLOCK: 時計を上寄りのヒーローにし、日直/ログを下端へ寄せて上下余白を均す
+     （中央寄せで時計が下に見える・LOG下に余白が出る問題を解消） */
+  .display-mode {
+    justify-content: flex-start;
+    padding-top: clamp(20px, 5vh, 46px);
+    padding-bottom: clamp(10px, 2.5vh, 22px);
+    gap: clamp(10px, 2vh, 18px);
+  }
+  .display-roster {
+    margin-top: auto;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1181,21 +1179,35 @@ body::before {
   flex: 1;
 }
 
-/* 掲示モードでは ヘッダーの時計/日付は大型表示と重複するため隠す（重複解消） */
-.app-shell[data-mode="display"] .header-date-bar,
+/* 掲示モードでは ヘッダーの時計は消さず「無効化(dimmed)」表示に。
+   レイアウト高さを保つことでモード切替時のタブバーのズレも防ぐ */
 .app-shell[data-mode="display"] .retro-clock {
-  display: none;
+  opacity: 0.3;
+  filter: grayscale(0.7);
+}
+.app-shell[data-mode="display"] .clock-dot {
+  box-shadow: none;
 }
 
-/* 掲示モードの並び順（両幅共通）: DATE → CLOCK(主役) → PHASE → GAUGE → REMAINING。
+/* 掲示モードの並び順（両幅共通）: LABEL → CLOCK(主役) → PHASE → GAUGE → REMAINING。
    PHASE/GAUGE/REMAINING は「現在のコマ」関連としてまとめて時計の下に置く */
-.display-date { order: 1; }
+.display-clock-label { order: 1; }
 .display-clock { order: 2; }
 .display-phase { order: 3; }
 .segment-gauge--xl { order: 4; }
 .display-remaining { order: 5; }
 .display-roster { order: 6; }
 .display-log { order: 7; }
+
+/* 時計の上の白文字ラベル */
+.display-clock-label {
+  font-family: var(--font-pixel);
+  font-size: clamp(11px, 2vw, 22px);
+  color: #ffffff;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
 
 /* ── 掲示モード（時計・授業ゲージの大型表示。広幅/狭幅とも有効） ──
    1画面に収める: flex:1 + overflow:hidden + 各要素 vh/vw 連動の控えめサイズ */
@@ -1406,12 +1418,12 @@ body::before {
     mix-blend-mode: multiply;
   }
 
-  /* サイズのみ調整（並び順は基本ルール: DATE→CLOCK→PHASE→GAUGE→REMAINING） */
-  .display-date { font-size: clamp(13px, 1.5vw, 20px); }
-  .display-phase { font-size: clamp(16px, 2.2vw, 28px); width: min(94vw, 760px); }
+  /* サイズ調整（白文字はやや小さめにして時計を引き立てる） */
+  .display-clock-label { font-size: clamp(11px, 1.5vw, 17px); }
+  .display-phase { font-size: clamp(13px, 1.8vw, 21px); width: min(94vw, 760px); }
   .display-clock { width: min(96vw, 920px); font-size: clamp(72px, 8vw, 112px); }
   .segment-gauge--xl { width: min(90vw, 640px); height: clamp(26px, 4vh, 44px); }
-  .display-remaining { width: min(94vw, 760px); }
+  .display-remaining { font-size: clamp(10px, 1.3vw, 14px); width: min(94vw, 760px); }
 
   /* タブ境界をダッシュボードの分割線(出席パネル｜右側スタック)に合わせる */
   .mode-bar {
@@ -1752,7 +1764,7 @@ body::before {
 /* ── 機能A: ヘッダー日付表示（2行目・全幅で中央寄せ） ─────────── */
 .header-date-bar {
   flex-basis: 100%;
-  order: 99;
+  order: 99; /* 従来位置: タイトル下・ヘッダーライン(区切り線)の上 */
   text-align: center;
   padding: 2px 0 0;
 }

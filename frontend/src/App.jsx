@@ -477,16 +477,20 @@ export default function App() {
       { key: 'r', char: '▣', cls: 'roster-icon--report', label: 'REPORT', ops: result?.report },
       { key: 'f', char: '◉', cls: 'roster-icon--feedback', label: 'FEEDBACK', ops: result?.feedback },
     ];
+    const hr = new Date().getHours();
+    const greeting =
+      hr < 5 ? 'GOOD NIGHT' :
+      hr < 11 ? 'GOOD MORNING' :
+      hr < 17 ? 'GOOD AFTERNOON' :
+      hr < 22 ? 'GOOD EVENING' : 'GOOD NIGHT';
     return (
       <section className="display-mode" aria-label="掲示モード">
+        {/* 時計の上の白文字ラベル（時間帯で自動切替の挨拶） */}
+        <div className="display-clock-label">{greeting}</div>
         {/* LED風時計: 消灯セグメント(8の字)をゴーストで背面表示し、現在時刻を前面に */}
         <div className="display-clock">
           <span className="display-clock__ghost" aria-hidden="true">{currentTime.replace(/[0-9]/g, '8')}</span>
           <span className="display-clock__time">{currentTime}</span>
-        </div>
-        <div className="display-date">
-          <span className="header-date-iso">{todayStr}</span>
-          <span className="header-dow" style={{ color: dayColor }}> [{dayNameEn}]</span>
         </div>
         <div className="display-phase">{phaseEn}</div>
         <div className={`segment-gauge segment-gauge--xl ${gaugeClass}`} title={`${Math.round(shiftProgress)}%`}>
