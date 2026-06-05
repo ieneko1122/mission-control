@@ -1,23 +1,23 @@
 /** 月〜金の標準時間割（イレギュラーはオーバーライドで対応） */
 export const SCHEDULE_BLOCKS = [
-  { id: 'prep', label: '講義準備', type: 'prep', start: '08:45', end: '09:00' },
-  { id: 'morning', label: '朝礼・振り返り', type: 'ceremony', start: '09:00', end: '09:40' },
-  { id: 'break1', label: '10分休憩', type: 'break', start: '09:40', end: '09:50' },
-  { id: 'p1', label: '1限目', type: 'class', start: '09:50', end: '10:40' },
-  { id: 'break2', label: '10分休憩', type: 'break', start: '10:40', end: '10:50' },
-  { id: 'p2', label: '2限目', type: 'class', start: '10:50', end: '12:00' },
-  { id: 'lunch', label: '昼休み', type: 'lunch', start: '12:00', end: '13:00' },
-  { id: 'p3', label: '3限目', type: 'class', start: '13:00', end: '13:40' },
-  { id: 'break3', label: '10分休憩', type: 'break', start: '13:40', end: '13:50' },
-  { id: 'p4', label: '4限目', type: 'class', start: '13:50', end: '14:40' },
-  { id: 'break4', label: '10分休憩', type: 'break', start: '14:40', end: '14:50' },
-  { id: 'p5', label: '5限目', type: 'class', start: '14:50', end: '15:40' },
-  { id: 'break5', label: '10分休憩', type: 'break', start: '15:40', end: '15:50' },
-  { id: 'p6', label: '6限目', type: 'class', start: '15:50', end: '16:30' },
-  { id: 'break6', label: '10分休憩', type: 'break', start: '16:30', end: '16:40' },
-  { id: 'task', label: '課題時間', type: 'task', start: '16:40', end: '17:30' },
-  { id: 'break7', label: '10分休憩', type: 'break', start: '17:30', end: '17:40' },
-  { id: 'report', label: '日報・終礼', type: 'report', start: '17:40', end: '18:00' },
+  { id: 'prep', label: 'Lecture Prep', type: 'prep', start: '08:45', end: '09:00' },
+  { id: 'morning', label: 'Morning Assembly', type: 'ceremony', start: '09:00', end: '09:40' },
+  { id: 'break1', label: '10-min Break', type: 'break', start: '09:40', end: '09:50' },
+  { id: 'p1', label: 'Period 1', type: 'class', start: '09:50', end: '10:40' },
+  { id: 'break2', label: '10-min Break', type: 'break', start: '10:40', end: '10:50' },
+  { id: 'p2', label: 'Period 2', type: 'class', start: '10:50', end: '12:00' },
+  { id: 'lunch', label: 'Lunch Break', type: 'lunch', start: '12:00', end: '13:00' },
+  { id: 'p3', label: 'Period 3', type: 'class', start: '13:00', end: '13:40' },
+  { id: 'break3', label: '10-min Break', type: 'break', start: '13:40', end: '13:50' },
+  { id: 'p4', label: 'Period 4', type: 'class', start: '13:50', end: '14:40' },
+  { id: 'break4', label: '10-min Break', type: 'break', start: '14:40', end: '14:50' },
+  { id: 'p5', label: 'Period 5', type: 'class', start: '14:50', end: '15:40' },
+  { id: 'break5', label: '10-min Break', type: 'break', start: '15:40', end: '15:50' },
+  { id: 'p6', label: 'Period 6', type: 'class', start: '15:50', end: '16:30' },
+  { id: 'break6', label: '10-min Break', type: 'break', start: '16:30', end: '16:40' },
+  { id: 'task', label: 'Study Time', type: 'task', start: '16:40', end: '17:30' },
+  { id: 'break7', label: '10-min Break', type: 'break', start: '17:30', end: '17:40' },
+  { id: 'report', label: 'Daily Wrap-up', type: 'report', start: '17:40', end: '18:00' },
 ];
 
 export const FREE_LENGTH_OPTIONS = [45, 50, 90];
@@ -85,19 +85,19 @@ export function resolveActiveBlock(now, rawOverride) {
   if (override.mode === 'free' && override.freeEndMs && nowMs < override.freeEndMs) {
     return {
       id: 'free',
-      label: `フリーモード (${override.freeMinutes}分)`,
+      label: `Free Mode (${override.freeMinutes} min)`,
       type: 'free',
       index: -1,
       startMs: override.freeStartMs,
       endMs: override.freeEndMs,
-      rangeLabel: '手動',
+      rangeLabel: 'Manual',
       source: 'free',
       active: true,
     };
   }
 
   if (!isSchoolDay(now)) {
-    return inactiveBlock('週末（自動時間割オフ）', 'off');
+    return inactiveBlock('Weekend (Auto Off)', 'off');
   }
 
   const blocks = getBlocksForDate(now);
@@ -135,13 +135,13 @@ export function resolveActiveBlock(now, rawOverride) {
   }
 
   if (nowMs < blocks[0].startMs) {
-    return inactiveBlock('始業前', 'off', blocks[0]);
+    return inactiveBlock('Before Hours', 'off', blocks[0]);
   }
   if (nowMs >= blocks[blocks.length - 1].endMs) {
-    return inactiveBlock('終業後', 'off');
+    return inactiveBlock('After Hours', 'off');
   }
 
-  return inactiveBlock('時間割外', 'off');
+  return inactiveBlock('Off Schedule', 'off');
 }
 
 function inactiveBlock(label, type, nextBlock = null) {
@@ -152,7 +152,7 @@ function inactiveBlock(label, type, nextBlock = null) {
     index: -1,
     startMs: null,
     endMs: null,
-    rangeLabel: nextBlock ? `次 ${nextBlock.label} ${nextBlock.start}〜` : '—',
+    rangeLabel: nextBlock ? `Next: ${nextBlock.label} ${nextBlock.start}~` : '—',
     source: 'off',
     active: false,
     nextBlock,
@@ -227,10 +227,10 @@ export function buildFreeOverride(now, minutes) {
 
 export function sourceLabel(source) {
   switch (source) {
-    case 'auto': return '自動';
-    case 'extended': return '延長';
-    case 'manual': return '手動';
-    case 'free': return 'フリー';
+    case 'auto': return 'AUTO';
+    case 'extended': return 'EXTENDED';
+    case 'manual': return 'MANUAL';
+    case 'free': return 'FREE';
     default: return '—';
   }
 }

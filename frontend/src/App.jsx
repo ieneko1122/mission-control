@@ -385,7 +385,7 @@ export default function App() {
       // DBが正（ロールバック後の状態をDBから取得して表示を更新）
       await fetchLastResult();
       await fetchRotation();
-      addLog('>> DBから最新状態を復元しました。');
+      addLog('>> Restored latest state from DB.');
     } catch (err) {
       addLog('ERROR: ROLLBACK REJECTED.');
     }
@@ -467,6 +467,11 @@ export default function App() {
 
   // 掲示モード: 時計・授業(シフト)ゲージを大型表示（広幅/狭幅とも有効）
   const renderDisplayMode = () => {
+    // 時間割ラベルは schedule.js 側で英語化済み。CSSで大文字化して表示
+    const phaseEn = activeBlock.label;
+    const remainingEn = activeBlock.active
+      ? `${Math.round(shiftProgress)}%   //   ${shiftRemainingMin} MIN LEFT`
+      : 'STANDBY';
     const rosterGroups = [
       { key: 'a', char: '◆', cls: 'roster-icon--assembly', label: 'ASSEMBLY', ops: result?.assembly },
       { key: 'r', char: '▣', cls: 'roster-icon--report', label: 'REPORT', ops: result?.report },
@@ -474,12 +479,16 @@ export default function App() {
     ];
     return (
       <section className="display-mode" aria-label="掲示モード">
-        <div className="display-clock">{currentTime}</div>
+        {/* LED風時計: 消灯セグメント(8の字)をゴーストで背面表示し、現在時刻を前面に */}
+        <div className="display-clock">
+          <span className="display-clock__ghost" aria-hidden="true">{currentTime.replace(/[0-9]/g, '8')}</span>
+          <span className="display-clock__time">{currentTime}</span>
+        </div>
         <div className="display-date">
           <span className="header-date-iso">{todayStr}</span>
           <span className="header-dow" style={{ color: dayColor }}> [{dayNameEn}]</span>
         </div>
-        <div className="display-phase">{activeBlock.label}</div>
+        <div className="display-phase">{phaseEn}</div>
         <div className={`segment-gauge segment-gauge--xl ${gaugeClass}`} title={`${Math.round(shiftProgress)}%`}>
           {Array.from({ length: 10 }, (_, i) => (
             <div
@@ -488,11 +497,7 @@ export default function App() {
             />
           ))}
         </div>
-        <div className="display-remaining">
-          {activeBlock.active
-            ? `${Math.round(shiftProgress)}%  ·  残り約 ${shiftRemainingMin} 分`
-            : activeBlock.rangeLabel}
-        </div>
+        <div className="display-remaining">{remainingEn}</div>
         <div className="display-roster">
           {rosterGroups.map(g => (
             <div key={g.key} className="display-roster__item">
@@ -629,7 +634,7 @@ export default function App() {
             </div>
             <div className="side-deck__meta">
               {activeBlock.active
-                ? `${Math.round(shiftProgress)}% · 残り約${shiftRemainingMin}分 · ${sourceLabel(activeBlock.source)}`
+                ? `${Math.round(shiftProgress)}%  ·  ${shiftRemainingMin} MIN LEFT  ·  ${sourceLabel(activeBlock.source)}`
                 : activeBlock.rangeLabel}
             </div>
             <div className="side-deck__time">{activeBlock.rangeLabel}</div>
@@ -787,14 +792,16 @@ export default function App() {
         </button>
       </div>
 
-      {/* 全タブ共通ミニログ（狭幅の ALLOCATION/TOOLS でのみ表示。最新ログを1行） */}
-      <div className="mini-log">
-        <span className="mini-log__prompt">&gt;</span>
-        <span className="mini-log__text">{logTerminal[0]}</span>
-      </div>
       </>)}
 
-      <footer className="app-footer">
+      {/* 下部固定バー: ミニログ＋フッターを1ユニットにして sticky のズレを防ぐ */}
+      <div className="bottombar">
+        {/* 全タブ共通ミニログ（狭幅の ALLOCATION/TOOLS でのみ表示。最新ログを1行） */}
+        <div className="mini-log">
+          <span className="mini-log__prompt">&gt;</span>
+          <span className="mini-log__text">{logTerminal[0]}</span>
+        </div>
+        <footer className="app-footer">
         <span className="footer-status"><span className="accent-green">[SYS_OK]</span> CENTRAL MATRIX ONLINE</span>
         <span className="footer-center">:: MISSION_MGMNT_SYS :: SYS_CTRL_v3.00 ::</span>
         <span className="footer-right">
@@ -802,6 +809,7 @@ export default function App() {
           <span className="footer-metric">OPS <b>{opsCount}</b></span>
         </span>
       </footer>
+      </div>
 
       {showAdmin && createPortal(
         <div className="modal-overlay" onClick={() => setShowAdmin(false)}>
