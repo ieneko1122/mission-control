@@ -79,10 +79,10 @@ body {
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 2px 12px;
+  gap: 8px 18px;
   border-bottom: 3px double #00ffaa;
-  padding-bottom: 3px;
-  margin-bottom: 16px;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .app-title {
@@ -776,28 +776,139 @@ body::before {
   z-index: 1;
 }
 
-/* --- レスポンシブ --- */
-@media (max-width: 900px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr;
+/* --- レスポンシブ（狭幅/分割 + モード切替） --- */
+/* 狭幅(≤960=FullHD半分割など)では「1画面に収める」縦フレックス配分をやめ、
+   全パネルを app-shell 直下の flex 子に平坦化し、モード(日直/ツール)で
+   サブセットを出し分け＋優先度順に並べる。ヘッダー(時計+タブ)は sticky で固定。 */
+@media (max-width: 960px) {
+  html,
+  body {
+    height: auto;
+    min-height: 100%;
   }
 
-  .side-deck {
-    flex-direction: row;
-    flex-wrap: wrap;
+  #root {
+    flex: 0 0 auto;
   }
 
-  .side-deck__block {
-    flex: 1 1 200px;
+  .app-shell {
+    flex: 0 0 auto;
+    gap: 14px;
+  }
+
+  /* トップバー(ヘッダー＋タブ)を sticky 固定 → 中部のみスクロールする体感に */
+  .topbar {
+    order: -1;
+  }
+
+  .app-header {
+    margin-bottom: 0;
+  }
+
+  /* 狭幅: SPAWN/CLR を左、ミニ時計を右に振り分けて1行に整理。
+     ベースの justify-content:flex-end(後方定義)に勝つよう詳細度を上げる */
+  .app-header .header-right {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .app-footer {
+    order: 90;
+    margin-top: 0;
+  }
+
+  /* グリッド/サイドを平坦化し、内部パネルを app-shell 直下の flex 子へ昇格 */
+  .dashboard-grid,
+  .side-deck,
+  .dashboard-sidebar {
+    display: contents;
+  }
+
+  /* 昇格した各パネルは中身ぶんの自然な高さに */
+  .attendance-panel,
+  .side-deck__block,
+  .side-deck__block--ops,
+  .panel-timer,
+  .panel-queue,
+  .log-panel,
+  .roster-panel,
+  .controls-grid {
+    flex: 0 0 auto;
+    margin-top: 0;
   }
 
   .controls-grid {
     grid-template-columns: 1fr;
   }
 
+  /* overflow:hidden のクリップを解除して全内容を表示 */
+  .matrix-grid,
+  .roster-grid,
+  .roster-panel,
+  .attendance-panel,
+  .log-panel__body {
+    overflow: visible;
+  }
+
+  .matrix-grid {
+    grid-template-rows: auto;
+  }
+
+  .roster-grid {
+    grid-auto-rows: auto;
+  }
+
   .cyber-btn--warn {
     white-space: normal;
   }
+
+  .log-panel {
+    min-height: 120px;
+  }
+
+  /* 狭幅: ALLOCATION | TOOLS | CLOCK の3タブ。DASHBOARDは隠す
+     （ベース定義に勝つよう詳細度を上げる） */
+  .mode-bar .mode-tab--alloc,
+  .mode-bar .mode-tab--tools {
+    display: block;
+  }
+  .mode-bar .mode-tab--dashboard {
+    display: none;
+  }
+
+  /* 狭幅の本体下部に共通ミニログを表示（フッター直前）。
+     ベースの display:none(後方定義)に勝つよう詳細度を上げる */
+  .app-shell .mini-log {
+    display: flex;
+    order: 89;
+  }
+
+  /* ALLOCATION: ATTENDANCE → ROSTER → QUEUE → CONTROLS
+     （授業ゲージ/タイマー/OPS/全文LOGは非表示。日直は名簿内アイコンで判別） */
+  .app-shell[data-mode="duty"] .panel-timer,
+  .app-shell[data-mode="duty"] .log-panel,
+  .app-shell[data-mode="duty"] .side-deck__block--ops,
+  .app-shell[data-mode="duty"] .side-deck__block:not(.side-deck__block--ops) {
+    display: none;
+  }
+  .app-shell[data-mode="duty"] .attendance-panel { order: 1; }
+  .app-shell[data-mode="duty"] .roster-panel { order: 2; }
+  .app-shell[data-mode="duty"] .panel-queue { order: 3; }
+  .app-shell[data-mode="duty"] .controls-grid { order: 4; }
+
+  /* TOOLS: TIMER → SHIFT LOAD(授業ゲージ＋操作) → FIELD OPS
+     （名簿/出席/QUEUE/操作/全文LOGは非表示） */
+  .app-shell[data-mode="tools"] .roster-panel,
+  .app-shell[data-mode="tools"] .attendance-panel,
+  .app-shell[data-mode="tools"] .controls-grid,
+  .app-shell[data-mode="tools"] .panel-queue,
+  .app-shell[data-mode="tools"] .log-panel {
+    display: none;
+  }
+  .app-shell[data-mode="tools"] .panel-timer { order: 1; }
+  .app-shell[data-mode="tools"] .side-deck__block:not(.side-deck__block--ops) { order: 2; }
+  .app-shell[data-mode="tools"] .side-deck__block--ops { order: 3; }
 }
 
 @media (max-width: 640px) {
@@ -858,7 +969,9 @@ body::before {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px 12px;
 }
 
 .fish-ctrl {
@@ -896,6 +1009,229 @@ body::before {
   border-color: #ff3366;
   color: #ff3366;
   box-shadow: 0 0 6px rgba(255, 51, 102, 0.3);
+}
+
+/* ── トップバー（ヘッダー＋モードタブをまとめてスクロール時固定） ── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #030508;
+  /* スクロール時に下のパネルが透けないよう不透明背景 */
+  padding-bottom: 0;
+}
+
+/* ── モードタブ（全幅セグメントタブバー） ───────────────────── */
+/* ヘッダー margin-bottom と本体への margin を揃え、上下12pxの統一リズムにする */
+.mode-bar {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 12px;
+}
+
+.mode-tab {
+  flex: 1;
+  min-width: 0;
+  background: #071310;
+  border: 1px solid #1f4d3f;
+  color: #6fb89c;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  padding: 8px 6px;
+  cursor: pointer;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.12s;
+}
+
+.mode-tab:hover {
+  border-color: #00ffaa;
+  color: #00ffaa;
+  box-shadow: 0 0 6px rgba(0, 255, 170, 0.2);
+}
+
+.mode-tab.active {
+  background: #00ffaa;
+  color: #021109;
+  border-color: #00ffaa;
+  box-shadow: 0 0 10px rgba(0, 255, 170, 0.4);
+}
+
+/* 広幅: DASHBOARD | CLOCK の2タブ（ALLOCATION/TOOLSはダッシュボードに統合され区別不要） */
+.mode-tab--alloc,
+.mode-tab--tools {
+  display: none;
+}
+
+/* ── 全タブ共通ミニログ（広幅では非表示。狭幅で本体最下部に最新1行） ── */
+.mini-log {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #163a31;
+  background: #020607;
+  padding: 6px 10px;
+  min-width: 0;
+}
+
+.mini-log__prompt {
+  font-family: var(--font-mono);
+  color: #00ffaa;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.mini-log__text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #00ffaa;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+}
+
+/* ── 掲示モード（時計・授業ゲージの大型表示。広幅/狭幅とも有効） ──
+   1画面に収める: flex:1 + overflow:hidden + 各要素 vh/vw 連動の控えめサイズ */
+.display-mode {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(6px, 1.8vh, 18px);
+  text-align: center;
+  padding: clamp(8px, 2vh, 20px) 12px;
+}
+
+/* 大時計: ファミコン(ピクセル)フォント。幅にも収まるよう vw 連動でキャップ */
+.display-clock {
+  font-family: var(--font-pixel);
+  font-size: clamp(22px, 8vw, 72px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 2px;
+  color: #ff9900;
+  text-shadow: 0 0 10px rgba(255, 153, 0, 0.7), 3px 3px 0 #5a3300;
+}
+
+.display-date {
+  font-family: var(--font-pixel);
+  font-size: clamp(11px, 3vw, 22px);
+  letter-spacing: 1px;
+  line-height: 1.4;
+}
+
+.display-phase {
+  font-family: var(--font-jp);
+  font-size: clamp(16px, 4vw, 40px);
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 0 12px rgba(0, 255, 170, 0.4);
+  line-height: 1.2;
+}
+
+.display-remaining {
+  font-size: clamp(13px, 2.5vw, 24px);
+  color: #93b4c4;
+  letter-spacing: 1px;
+}
+
+/* 大型ゲージ: 角を丸めて尖り感を抑え、縦幅は控えめに */
+.segment-gauge--xl {
+  height: clamp(28px, 5vh, 52px);
+  width: min(92vw, 820px);
+  gap: 6px;
+  margin: 0;
+}
+
+.segment-gauge--xl .segment-gauge__cell {
+  border-radius: 5px;
+}
+
+/* 日直ボード: レトロネオンHUD調（枠＋発光＋種別カラー） */
+.display-roster {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: min(94vw, 560px);
+  padding: clamp(8px, 1.6vh, 14px) 14px;
+  border: 1px solid #0c6f7d;
+  background: linear-gradient(180deg, rgba(0, 30, 38, 0.7), rgba(0, 12, 18, 0.7));
+  box-shadow: 0 0 14px rgba(0, 255, 255, 0.18), inset 0 0 12px rgba(0, 255, 255, 0.06);
+}
+
+.display-roster__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: clamp(12px, 2.2vw, 19px);
+  padding: 4px 0;
+  border-bottom: 1px dotted rgba(0, 255, 255, 0.14);
+}
+
+.display-roster__item:last-child {
+  border-bottom: none;
+}
+
+.display-roster__label {
+  font-family: var(--font-mono);
+  font-size: 0.62em;
+  letter-spacing: 1px;
+  min-width: 5.5em;
+  text-align: left;
+  color: #4fd6e6;
+}
+
+.display-roster__names {
+  font-family: var(--font-name);
+  color: #ffffff;
+  font-weight: 700;
+  text-align: left;
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+}
+
+.display-roster .roster-icon {
+  font-size: 1.1em;
+  margin: 0;
+}
+
+/* CLOCK内の全文ログ（コンパクト） */
+.display-log {
+  width: min(94vw, 560px);
+  text-align: left;
+  border: 1px solid #163a31;
+  background: #020607;
+  padding: 6px 10px;
+  overflow: hidden;
+}
+
+.display-log__title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: #6f7d74;
+  border-bottom: 1px dotted #1c2a24;
+  padding-bottom: 2px;
+  margin-bottom: 3px;
+  letter-spacing: 1px;
+}
+
+.display-log__line {
+  font-family: var(--font-mono);
+  font-size: clamp(9px, 1.4vw, 12px);
+  color: #00ffaa;
+  line-height: 1.45;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 枠付きデジタル時計（LCDベゼル風） */

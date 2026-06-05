@@ -80,6 +80,11 @@ export default function App() {
   const [freeMinutes, setFreeMinutes] = useState(50);
   const [opsCount, setOpsCount] = useState(loadDailyOpsCount);
   const [showKanji, setShowKanji] = useState(false);
+  // 表示モード: 'duty'(日直) / 'tools'(ツール) / 'display'(掲示)。狭幅でタブ切替、掲示は広幅でも有効
+  const [viewMode, setViewMode] = useState(() => {
+    const saved = localStorage.getItem('mission_view_mode');
+    return saved === 'tools' || saved === 'display' ? saved : 'duty';
+  });
   const [aquariumSpawn, setAquariumSpawn] = useState(0);
   const [aquariumClear, setAquariumClear] = useState(0);
   const lastPhaseIdRef = useRef(null);
@@ -288,6 +293,10 @@ export default function App() {
     shiftProgress >= 75 ? 'segment-gauge--critical' : '';
   const gaugeClass = `${gaugeTypeClass} ${gaugeStateClass}`.trim();
   const isManualMode = shiftOverride.mode !== 'auto';
+  const changeViewMode = (mode) => {
+    setViewMode(mode);
+    localStorage.setItem('mission_view_mode', mode);
+  };
   const displayName = (op) => (showKanji && op.nameKanji) ? op.nameKanji : op.name;
   // ROSTER の result は旧データの可能性があるため operators リストから nameKanji を補完する
   const displayResultName = (resultOp) => {
@@ -456,11 +465,63 @@ export default function App() {
 
   const rosterEmpty = <div className="roster-name roster-name--empty">-- ///</div>;
 
+  // 掲示モード: 時計・授業(シフト)ゲージを大型表示（広幅/狭幅とも有効）
+  const renderDisplayMode = () => {
+    const rosterGroups = [
+      { key: 'a', char: '◆', cls: 'roster-icon--assembly', label: 'ASSEMBLY', ops: result?.assembly },
+      { key: 'r', char: '▣', cls: 'roster-icon--report', label: 'REPORT', ops: result?.report },
+      { key: 'f', char: '◉', cls: 'roster-icon--feedback', label: 'FEEDBACK', ops: result?.feedback },
+    ];
+    return (
+      <section className="display-mode" aria-label="掲示モード">
+        <div className="display-clock">{currentTime}</div>
+        <div className="display-date">
+          <span className="header-date-iso">{todayStr}</span>
+          <span className="header-dow" style={{ color: dayColor }}> [{dayNameEn}]</span>
+        </div>
+        <div className="display-phase">{activeBlock.label}</div>
+        <div className={`segment-gauge segment-gauge--xl ${gaugeClass}`} title={`${Math.round(shiftProgress)}%`}>
+          {Array.from({ length: 10 }, (_, i) => (
+            <div
+              key={i}
+              className={`segment-gauge__cell ${i < filledSegments ? 'segment-gauge__cell--on' : ''}`}
+            />
+          ))}
+        </div>
+        <div className="display-remaining">
+          {activeBlock.active
+            ? `${Math.round(shiftProgress)}%  ·  残り約 ${shiftRemainingMin} 分`
+            : activeBlock.rangeLabel}
+        </div>
+        <div className="display-roster">
+          {rosterGroups.map(g => (
+            <div key={g.key} className="display-roster__item">
+              <span className={`roster-icon ${g.cls}`}>{g.char}</span>
+              <span className="display-roster__label">{g.label}</span>
+              <span className="display-roster__names">
+                {g.ops && g.ops.length > 0 ? g.ops.map(op => displayResultName(op)).join('  /  ') : '---'}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="display-log">
+          <div className="display-log__title">OUTPUT LOG MATRIX</div>
+          {logTerminal.slice(0, 5).map((log, i) => (
+            <div key={i} className={`display-log__line ${log.includes('ERROR') || log.includes('OVER') ? 'log-line--alert' : ''}`}>
+              {log}
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  };
+
   return (
-    <div className={`app-shell ${isTimeOverAlert ? 'time-over-flash' : ''}`}>
+    <div className={`app-shell ${isTimeOverAlert ? 'time-over-flash' : ''}`} data-mode={viewMode}>
       {/* 全画面背景レイヤー: セグメントフィッシュ */}
       <AquariumPanel spawnTrigger={aquariumSpawn} clearTrigger={aquariumClear} storageKey="mission_aquarium_count" />
 
+      <div className="topbar">
       <header className="app-header">
         <h1 className="app-title">
           <span className="accent-green">[{'>'}{'>'}]</span> MISSION_MGMNT_SYS <span className="app-subtitle">[SYS_CTRL_v3.00_GAME_MODE]</span>
@@ -484,6 +545,32 @@ export default function App() {
         </div>
       </header>
 
+      {/* モードタブ（全幅スティッキー）。広幅: DASHBOARD|CLOCK / 狭幅: ALLOCATION|TOOLS|CLOCK */}
+      <nav className="mode-bar" role="tablist" aria-label="表示モード">
+        <button
+          type="button" role="tab" aria-selected={viewMode !== 'display'}
+          className={`mode-tab mode-tab--dashboard ${viewMode !== 'display' ? 'active' : ''}`}
+          onClick={() => changeViewMode('duty')}
+        >DASHBOARD</button>
+        <button
+          type="button" role="tab" aria-selected={viewMode === 'duty'}
+          className={`mode-tab mode-tab--alloc ${viewMode === 'duty' ? 'active' : ''}`}
+          onClick={() => changeViewMode('duty')}
+        >ALLOCATION</button>
+        <button
+          type="button" role="tab" aria-selected={viewMode === 'display'}
+          className={`mode-tab mode-tab--clock ${viewMode === 'display' ? 'active' : ''}`}
+          onClick={() => changeViewMode('display')}
+        >CLOCK</button>
+        <button
+          type="button" role="tab" aria-selected={viewMode === 'tools'}
+          className={`mode-tab mode-tab--tools ${viewMode === 'tools' ? 'active' : ''}`}
+          onClick={() => changeViewMode('tools')}
+        >TOOLS</button>
+      </nav>
+      </div>
+
+      {viewMode === 'display' ? renderDisplayMode() : (<>
       <div className="dashboard-grid">
 
         {/* LEFT COLUMN: ATTENDANCE */}
@@ -699,6 +786,13 @@ export default function App() {
           <span className="btn-led btn-led--orange" /> EMERGENCY PROTOCOL
         </button>
       </div>
+
+      {/* 全タブ共通ミニログ（狭幅の ALLOCATION/TOOLS でのみ表示。最新ログを1行） */}
+      <div className="mini-log">
+        <span className="mini-log__prompt">&gt;</span>
+        <span className="mini-log__text">{logTerminal[0]}</span>
+      </div>
+      </>)}
 
       <footer className="app-footer">
         <span className="footer-status"><span className="accent-green">[SYS_OK]</span> CENTRAL MATRIX ONLINE</span>
