@@ -210,10 +210,25 @@ body {
 }
 
 .cyber-btn--warn {
-  font-size: 12px;
+  font-size: 10px;
   border-color: #ff9900;
   color: #ff9900;
   white-space: nowrap;
+}
+
+/* RUN ALLOCATION / EMERGENCY を統一感のあるピクセル(アーケード)フォントに */
+.cyber-btn.main-btn,
+.cyber-btn--warn {
+  font-family: var(--font-pixel);
+  letter-spacing: 1px;
+  line-height: 1.5;
+}
+.cyber-btn.main-btn {
+  font-size: 10px;
+  white-space: normal;
+}
+.cyber-btn--warn {
+  white-space: normal;
 }
 
 /* CONTROLボタンの稼働ステータスLED */
@@ -569,18 +584,26 @@ body::before {
   line-height: 1.3;
 }
 
+/* メトロイド風エナジーメーター: 凹んだハウジング枠の中に発光セグメント */
 .segment-gauge {
   display: flex;
   gap: 3px;
   height: 24px;
   margin: 8px 0 10px;
   cursor: default;
+  padding: 3px;
+  border: 1px solid #145244;
+  border-radius: 4px;
+  background: #03120d;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .segment-gauge__cell {
   flex: 1;
   border: 1px solid #1a3d33;
   background: #020605;
+  border-radius: 2px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transition: background 0.25s, box-shadow 0.25s;
 }
 
@@ -632,13 +655,15 @@ body::before {
 }
 
 .shift-phase-label {
-  font-family: var(--font-jp);
-  font-size: 14px;
-  font-weight: 800;
-  color: #ffffff;
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  font-weight: 400;
+  color: #8cff66;
   text-align: center;
-  line-height: 1.25;
-  text-shadow: 0 0 4px rgba(0, 255, 170, 0.35);
+  line-height: 1.5;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(140, 255, 102, 0.55);
 }
 
 .side-deck__time {
@@ -984,16 +1009,13 @@ body::before {
   .app-shell[data-mode="tools"] .side-deck__block:not(.side-deck__block--ops) { order: 2; }
   .app-shell[data-mode="tools"] .side-deck__block--ops { order: 3; }
 
-  /* 狭幅CLOCK: 時計を上寄りのヒーローにし、日直/ログを下端へ寄せて上下余白を均す
-     （中央寄せで時計が下に見える・LOG下に余白が出る問題を解消） */
+  /* 狭幅CLOCK: 全体を中央寄せ＋上下対称パディングで、時計+ゲージをやや下げ、
+     上下要素との間隔を均等にする */
   .display-mode {
-    justify-content: flex-start;
-    padding-top: clamp(20px, 5vh, 46px);
-    padding-bottom: clamp(10px, 2.5vh, 22px);
-    gap: clamp(10px, 2vh, 18px);
-  }
-  .display-roster {
-    margin-top: auto;
+    justify-content: center;
+    padding-top: clamp(14px, 3.5vh, 32px);
+    padding-bottom: clamp(14px, 3.5vh, 32px);
+    gap: clamp(12px, 2.6vh, 22px);
   }
 }
 
@@ -1391,6 +1413,96 @@ body::before {
   text-overflow: ellipsis;
 }
 
+/* ── 掲示モード進入時の点灯アニメ（アーケード/CRT電源ON風） ──
+   大時計→情報(時間割/ゲージ/残り/日直/ログ)を早めに、挨拶は最後にゆっくり点灯。
+   小時計は data-mode 変化時にトランジションで消灯（=入れ替わり感）。 */
+@keyframes crt-power-on {
+  0%   { opacity: 0; transform: scaleY(0.4); filter: brightness(2.6); }
+  7%   { opacity: 1; transform: scaleY(0.4); filter: brightness(2.6); }
+  16%  { opacity: 0.25; transform: scaleY(0.75); }
+  30%  { opacity: 1; transform: scaleY(1.06); filter: brightness(1.5); }
+  46%  { opacity: 0.7; }
+  62%  { opacity: 1; transform: scaleY(1); filter: brightness(1.12); }
+  100% { opacity: 1; transform: scaleY(1); filter: none; }
+}
+
+/* transform を自前で持つ要素(日直の中央寄せ等)用: opacity/filter のみで点灯 */
+@keyframes crt-power-on-flat {
+  0%   { opacity: 0; filter: brightness(2.6); }
+  10%  { opacity: 1; filter: brightness(2.6); }
+  20%  { opacity: 0.25; }
+  35%  { opacity: 1; filter: brightness(1.5); }
+  55%  { opacity: 0.75; }
+  70%  { opacity: 1; filter: brightness(1.12); }
+  100% { opacity: 1; filter: none; }
+}
+
+.display-clock,
+.display-phase,
+.segment-gauge--xl,
+.display-remaining,
+.display-log {
+  animation: crt-power-on 0.5s ease-out both;
+}
+.display-clock     { animation-delay: 0.15s; }
+.display-phase     { animation-delay: 0.30s; }
+.segment-gauge--xl { animation-delay: 0.36s; }
+.display-remaining { animation-delay: 0.42s; }
+.display-log       { animation-delay: 0.52s; }
+
+/* 日直は transform を保持するため flat 版で点灯 */
+.display-roster {
+  animation: crt-power-on-flat 0.5s ease-out both;
+  animation-delay: 0.46s;
+}
+
+/* 挨拶は機能に無関係なので最後にゆっくり点灯 */
+.display-clock-label {
+  animation: crt-power-on-flat 0.9s ease-out both;
+  animation-delay: 0.9s;
+}
+
+/* 小時計: モード切替で点灯/消灯をトランジション（消えずに無効化へ） */
+.retro-clock {
+  transition: opacity 0.35s ease, filter 0.35s ease;
+}
+
+/* モード切替のたびに再マウントして点灯アニメを再生。display:contents でレイアウトには影響させない */
+.mode-content {
+  display: contents;
+}
+
+/* ダッシュボード/ALLOCATION/TOOLS の各パネルもタブ切替時にCRT点灯（情報は早め）。
+   .is-lit はモード変更時のみ付与されるため毎フレーム再起動しない。
+   ゲージ等を潰さないよう transform なしの flat 版を使用 */
+.app-shell.is-lit .attendance-panel,
+.app-shell.is-lit .side-deck__block,
+.app-shell.is-lit .panel-timer,
+.app-shell.is-lit .panel-queue,
+.app-shell.is-lit .log-panel,
+.app-shell.is-lit .roster-grid,
+.app-shell.is-lit .controls-grid {
+  animation: crt-power-on-flat 0.42s ease-out both;
+}
+.app-shell.is-lit .attendance-panel { animation-delay: 0.04s; }
+.app-shell.is-lit .panel-timer { animation-delay: 0.04s; }
+.app-shell.is-lit .side-deck__block { animation-delay: 0.10s; }
+.app-shell.is-lit .roster-grid { animation-delay: 0.12s; }
+.app-shell.is-lit .panel-queue { animation-delay: 0.15s; }
+.app-shell.is-lit .log-panel { animation-delay: 0.15s; }
+.app-shell.is-lit .controls-grid { animation-delay: 0.18s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .display-clock, .display-phase, .segment-gauge--xl, .display-remaining,
+  .display-log, .display-roster, .display-clock-label,
+  .app-shell.is-lit .attendance-panel, .app-shell.is-lit .side-deck__block,
+  .app-shell.is-lit .panel-timer, .app-shell.is-lit .panel-queue,
+  .app-shell.is-lit .log-panel, .app-shell.is-lit .roster-grid,
+  .app-shell.is-lit .controls-grid {
+    animation: none !important;
+  }
+}
+
 /* 広幅 CLOCK: 時計とゲージを画面中央の主役に。日直は左下へ控えめ配置、
    ログはフッターのミニログへ。CRTスキャンラインでアーケード(タイトー)調に。 */
 @media (min-width: 961px) {
@@ -1495,10 +1607,10 @@ body::before {
 }
 
 .clock-digits {
-  font-family: var(--font-mono);
-  font-size: 14px;
-  font-weight: bold;
-  letter-spacing: 2px;
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 1px;
   color: #ff9900;
   text-shadow: 0 0 8px rgba(255, 153, 0, 0.6);
 }

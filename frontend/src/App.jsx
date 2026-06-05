@@ -85,6 +85,8 @@ export default function App() {
     const saved = localStorage.getItem('mission_view_mode');
     return saved === 'tools' || saved === 'display' ? saved : 'duty';
   });
+  // タブ切替時の点灯アニメ用フラグ（モード変更のたびに off→on でアニメを1回再生）
+  const [isLit, setIsLit] = useState(false);
   const [aquariumSpawn, setAquariumSpawn] = useState(0);
   const [aquariumClear, setAquariumClear] = useState(0);
   const lastPhaseIdRef = useRef(null);
@@ -124,6 +126,13 @@ export default function App() {
     fetchLastResult();
     fetchRotation();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // タブ切替(モード変更)のたびに点灯アニメを1回再生
+  useEffect(() => {
+    setIsLit(true);
+    const t = setTimeout(() => setIsLit(false), 900);
+    return () => clearTimeout(t);
+  }, [viewMode]);
 
   const fetchStatus = async () => {
     try {
@@ -526,7 +535,7 @@ export default function App() {
   };
 
   return (
-    <div className={`app-shell ${isTimeOverAlert ? 'time-over-flash' : ''}`} data-mode={viewMode}>
+    <div className={`app-shell ${isTimeOverAlert ? 'time-over-flash' : ''} ${isLit ? 'is-lit' : ''}`} data-mode={viewMode}>
       {/* 全画面背景レイヤー: セグメントフィッシュ */}
       <AquariumPanel spawnTrigger={aquariumSpawn} clearTrigger={aquariumClear} storageKey="mission_aquarium_count" />
 
