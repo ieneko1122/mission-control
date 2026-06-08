@@ -87,6 +87,14 @@ export default function App() {
   });
   // タブ切替時の点灯アニメ用フラグ（モード変更のたびに off→on でアニメを1回再生）
   const [isLit, setIsLit] = useState(false);
+  // 日直の完了状況（当日分のみ保持。{date, done:[`role:id`]}）
+  const [dutyDone, setDutyDone] = useState(() => {
+    try {
+      const raw = JSON.parse(localStorage.getItem('mission_duty_done') || 'null');
+      if (raw && raw.date && Array.isArray(raw.done)) return raw;
+    } catch (_) {}
+    return { date: null, done: [] };
+  });
   const [aquariumSpawn, setAquariumSpawn] = useState(0);
   const [aquariumClear, setAquariumClear] = useState(0);
   const lastPhaseIdRef = useRef(null);
@@ -107,7 +115,7 @@ export default function App() {
   const isResultStale = lastResultFetched && (!lastResultMeta?.assignedDate || lastResultMeta.assignedDate !== todayStr);
 
   const addLog = (msg) => {
-    setLogTerminal(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev.slice(0, 7)]);
+    setLogTerminal(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev.slice(0, 59)]);
   };
 
   useEffect(() => {
@@ -130,7 +138,7 @@ export default function App() {
   // タブ切替(モード変更)のたびに点灯アニメを1回再生
   useEffect(() => {
     setIsLit(true);
-    const t = setTimeout(() => setIsLit(false), 900);
+    const t = setTimeout(() => setIsLit(false), 1800);
     return () => clearTimeout(t);
   }, [viewMode]);
 
@@ -422,6 +430,44 @@ export default function App() {
     }
   };
 
+  // 日直の完了管理（当日分のみ。日付が変わると自動的に未完了＝未にリセット）
+  const dutyKey = (role, id) => `${role}:${id}`;
+  const isDutyDone = (role, id) => dutyDone.date === todayStr && dutyDone.done.includes(dutyKey(role, id));
+  const toggleDutyDone = (role, id) => {
+    setDutyDone(prev => {
+      const base = prev.date === todayStr ? prev.done : [];
+      const k = dutyKey(role, id);
+      const done = base.includes(k) ? base.filter(x => x !== k) : [...base, k];
+      const next = { date: todayStr, done };
+      localStorage.setItem('mission_duty_done', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  // ROSTER 全体の進捗（未 / 実施中 / 済）。当日のROSTERでない場合は「未(本日未割当)」
+  const rosterAssignments = result ? [
+    ...(result.assembly || []).map(o => ['ASSEMBLY', o]),
+    ...(result.report || []).map(o => ['REPORT', o]),
+    ...(result.feedback || []).map(o => ['FEEDBACK', o]),
+  ] : [];
+  const dutyTotal = rosterAssignments.length;
+  const dutyDoneCount = rosterAssignments.filter(([role, o]) => isDutyDone(role, o.id)).length;
+  const dutyStatus =
+    (isResultStale || dutyTotal === 0) ? 'pending-stale' :
+    dutyDoneCount === 0 ? 'pending' :
+    dutyDoneCount < dutyTotal ? 'progress' : 'complete';
+
+  const renderDutyStatus = () => {
+    if (!lastResultFetched) return null;
+    const map = {
+      'pending-stale': { cls: 'duty-status--pending', icon: '○', label: 'NOT RUN' },
+      'pending': { cls: 'duty-status--pending', icon: '○', label: `PENDING 0/${dutyTotal}` },
+      'progress': { cls: 'duty-status--progress', icon: '◐', label: `IN PROGRESS ${dutyDoneCount}/${dutyTotal}` },
+      'complete': { cls: 'duty-status--complete', icon: '✔', label: `COMPLETE ${dutyDoneCount}/${dutyTotal}` },
+    }[dutyStatus];
+    return <span className={`duty-status ${map.cls}`}>{map.icon} {map.label}</span>;
+  };
+
   const isTimeOverAlert = timeLeft === 0 && !timerActive && logTerminal[0]?.includes('TIME OVER');
 
   // 機能C: 鮮度バッジのレンダリング
@@ -464,13 +510,22 @@ export default function App() {
     );
   };
 
-  // 機能B+C: ROSTER の確定者1行（出席カードと同じ ID タグで情報密度を統一）
-  const renderRosterName = (op) => (
-    <div key={op.id} className="roster-name roster-highlight">
-      <span className="roster-op-id">{String(op.displayOrder).padStart(2, '0')}</span>
-      <span className="roster-op-name">{displayResultName(op)}</span>
-    </div>
-  );
+  // 機能B+C: ROSTER の確定者1行。クリックで担当完了/未完了をトグル（完了は✓＋減光）
+  const renderRosterName = (op, role) => {
+    const done = isDutyDone(role, op.id);
+    return (
+      <div
+        key={op.id}
+        className={`roster-name roster-highlight roster-name--toggle ${done ? 'roster-name--done' : ''}`}
+        onClick={() => toggleDutyDone(role, op.id)}
+        title={done ? 'クリックで「未完了」に戻す' : 'クリックで「担当完了」にする'}
+      >
+        <span className="roster-done-mark">{done ? '✔' : '◯'}</span>
+        <span className="roster-op-id">{String(op.displayOrder).padStart(2, '0')}</span>
+        <span className="roster-op-name">{displayResultName(op)}</span>
+      </div>
+    );
+  };
 
   const rosterEmpty = <div className="roster-name roster-name--empty">-- ///</div>;
 
@@ -759,6 +814,7 @@ export default function App() {
       <div className={`cyber-panel roster-panel${isResultStale ? ' roster-panel--stale' : ''}`}>
         <div className="roster-header">
           <h2 className="panel-heading panel-heading--cyan">:: DAILY ALLOCATION ROSTER</h2>
+          {renderDutyStatus()}
           {renderFreshnessBadge()}
         </div>
         <div className="roster-grid">
@@ -766,7 +822,7 @@ export default function App() {
           <div className="roster-card">
             <h3 className="roster-title"><span className="roster-icon roster-icon--assembly">&#9670;</span>ASSEMBLY <span className="roster-slot">&times;1</span></h3>
             <div className="roster-names">
-              {result?.assembly?.[0] ? renderRosterName(result.assembly[0]) : rosterEmpty}
+              {result?.assembly?.[0] ? renderRosterName(result.assembly[0], 'ASSEMBLY') : rosterEmpty}
             </div>
             {renderPrevNext('ASSEMBLY')}
           </div>
@@ -775,7 +831,7 @@ export default function App() {
             <h3 className="roster-title"><span className="roster-icon roster-icon--report">&#9635;</span>REPORT <span className="roster-slot">&times;2</span></h3>
             <div className="roster-names">
               {result?.report?.length > 0
-                ? result.report.map(op => renderRosterName(op))
+                ? result.report.map(op => renderRosterName(op, 'REPORT'))
                 : rosterEmpty
               }
             </div>
@@ -786,7 +842,7 @@ export default function App() {
             <h3 className="roster-title"><span className="roster-icon roster-icon--feedback">&#9673;</span>FEEDBACK <span className="roster-slot">&times;2</span></h3>
             <div className="roster-names">
               {result?.feedback?.length > 0
-                ? result.feedback.map(op => renderRosterName(op))
+                ? result.feedback.map(op => renderRosterName(op, 'FEEDBACK'))
                 : rosterEmpty
               }
             </div>

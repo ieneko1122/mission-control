@@ -170,6 +170,8 @@ body {
   /* attendance 1fr : (side-deck+sidebar) 1fr → attendance ≈ コンテナの半分 = 右端が画面中央付近。
      DPI拡大率でCSS幅が1200px未満になり ≥1200 のメディアクエリが効かない環境でもこのルールで中央寄せになる。 */
   grid-template-columns: minmax(0, 1fr) minmax(160px, 0.45fr) minmax(200px, 0.55fr);
+  /* 行を箱の高さに固定（auto だと中身=出席パネル内容に合わせて伸び、枠が下のROSTERへはみ出す） */
+  grid-template-rows: minmax(0, 1fr);
   gap: 18px;
   align-items: stretch;
   /* 縦の余白配分: 出席グリッド : ROSTER : SEQUENCE */
@@ -324,30 +326,29 @@ body::before {
   letter-spacing: 1px;
   position: relative;
   box-shadow: 3px 3px 0px #005533;
-  transition: transform 0.05s steps(2), box-shadow 0.05s steps(2);
+  transition: box-shadow 0.15s ease, background 0.12s ease, color 0.12s ease, transform 0.06s ease;
 }
 
+/* ホバー: ジッター/白影をやめ、ネオン管が灯るようなグローに（影付きの3D感は維持） */
 .cyber-btn:hover {
   background: #00ffaa;
-  color: #000;
+  color: #001a10;
   text-shadow: none !important;
-  box-shadow: 3px 3px 0px #ffffff;
-  animation: retro-twitch 0.3s infinite steps(2);
+  box-shadow: 0 0 12px rgba(0, 255, 170, 0.75), 0 0 24px rgba(0, 255, 170, 0.4), 3px 3px 0px #005533;
 }
 
 .cyber-btn:active {
   transform: translate(3px, 3px);
-  box-shadow: 0px 0px 0px transparent;
+  box-shadow: 0 0 10px rgba(0, 255, 170, 0.6);
 }
 
 .cyber-btn.main-btn {
   font-size: 13px;
   background: #002211;
-  border-width: 3px;
 }
 .cyber-btn.main-btn:hover {
   background: #00ffaa;
-  color: #000;
+  color: #001a10;
 }
 
 .cyber-btn.danger {
@@ -358,8 +359,21 @@ body::before {
 }
 .cyber-btn.danger:hover {
   background: #ff3366;
-  color: #000;
-  box-shadow: 3px 3px 0px #fff;
+  color: #1a0008;
+  box-shadow: 0 0 12px rgba(255, 51, 102, 0.75), 0 0 24px rgba(255, 51, 102, 0.4), 3px 3px 0px #801a33;
+}
+.cyber-btn.danger:active {
+  box-shadow: 0 0 10px rgba(255, 51, 102, 0.6);
+}
+
+/* EMERGENCY(warn) はオレンジのネオングロー */
+.cyber-btn--warn:hover {
+  background: #ff9900;
+  color: #1a0e00;
+  box-shadow: 0 0 12px rgba(255, 153, 0, 0.75), 0 0 24px rgba(255, 153, 0, 0.4), 3px 3px 0px #5a3a00;
+}
+.cyber-btn--warn:active {
+  box-shadow: 0 0 10px rgba(255, 153, 0, 0.6);
 }
 
 /* タイマー */
@@ -471,7 +485,37 @@ body::before {
 .log-panel__body {
   flex: 1;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 2px;
+  /* Firefox 用スクロールバー */
+  scrollbar-width: thin;
+  scrollbar-color: #00ffaa #02080a;
+}
+
+/* レトロ緑スクロールバー（Chrome/WebKit）: 緑の棒＋上下に緑の三角 */
+.log-panel__body::-webkit-scrollbar {
+  width: 12px;
+}
+.log-panel__body::-webkit-scrollbar-track {
+  background: #02080a;
+  border: 1px solid #0c3b2c;
+}
+.log-panel__body::-webkit-scrollbar-thumb {
+  background: #00ffaa;
+  border: 2px solid #02080a;
+  box-shadow: 0 0 4px rgba(0, 255, 170, 0.5);
+}
+.log-panel__body::-webkit-scrollbar-thumb:hover {
+  background: #33ffbb;
+}
+.log-panel__body::-webkit-scrollbar-button:single-button:vertical:decrement {
+  height: 12px;
+  background: #02080a url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12'><polygon points='6,3 10,9 2,9' fill='%2300ffaa'/></svg>") center no-repeat;
+}
+.log-panel__body::-webkit-scrollbar-button:single-button:vertical:increment {
+  height: 12px;
+  background: #02080a url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12'><polygon points='2,3 10,3 6,9' fill='%2300ffaa'/></svg>") center no-repeat;
 }
 
 .log-line {
@@ -512,7 +556,7 @@ body::before {
   margin-top: 6px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: repeat(3, 1fr);
+  grid-template-rows: repeat(3, minmax(0, 1fr));
   gap: 12px;
   flex: 1;
   min-width: 0;
@@ -524,17 +568,20 @@ body::before {
 .side-deck {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
   min-width: 0;
+  min-height: 0;
+  /* 中身が箱を超えて下のROSTERへ回り込まないようクリップ */
+  overflow: hidden;
 }
 
 .side-deck__block {
   border: 1px dashed #1d4a3a;
   background: #040a0e;
-  padding: 8px;
+  padding: 5px 8px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 /* FIELD OPS を縦に伸ばす */
@@ -586,14 +633,18 @@ body::before {
 .segment-gauge {
   display: flex;
   align-items: stretch;
-  gap: 3px;
+  gap: 5px; /* ブロック間隔をやや広げる */
   margin: 8px 0 10px;
   cursor: default;
-  padding: 3px;
-  border: 1px solid #145244;
-  border-radius: 4px;
-  background: #03120d;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  padding: 4px;
+  /* レトロな筐体メーター枠: 角を立て、外周は2重線＋内側ベベル(明暗インセット) */
+  border: 2px solid #0e3a30;
+  border-radius: 0;
+  background: #04100b;
+  box-shadow:
+    inset 2px 2px 0 rgba(0, 0, 0, 0.7),
+    inset -2px -2px 0 rgba(40, 130, 100, 0.22),
+    0 0 0 1px #020806;
 }
 
 .segment-gauge__cell {
@@ -606,51 +657,56 @@ body::before {
   transition: background 0.25s, box-shadow 0.25s;
 }
 
+/* 点灯セルはネオン管らしく二層のぼんやりグローで光らせる（色相は維持し明度/発光量を少し増） */
 .segment-gauge__cell--on {
-  background: #00aa66;
-  border-color: #00ffaa;
-  box-shadow: 0 0 6px rgba(0, 255, 170, 0.45);
+  background: #10cf7e;
+  border-color: #7cffcf;
+  box-shadow: 0 0 8px rgba(0, 255, 170, 0.65), 0 0 20px rgba(0, 255, 170, 0.4);
 }
 
 .segment-gauge--critical .segment-gauge__cell--on {
-  background: #cc7700;
-  border-color: #ff9900;
-  box-shadow: 0 0 8px rgba(255, 153, 0, 0.5);
+  background: #f29800;
+  border-color: #ffcf75;
+  box-shadow: 0 0 9px rgba(255, 153, 0, 0.7), 0 0 22px rgba(255, 153, 0, 0.42);
 }
 
 .segment-gauge--complete .segment-gauge__cell--on {
-  background: #00cccc;
-  border-color: #00ffff;
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.55);
+  background: #18ecec;
+  border-color: #9cffff;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.7), 0 0 24px rgba(0, 255, 255, 0.42);
   animation: gauge-pulse 1.2s ease-in-out infinite alternate;
 }
 
 .segment-gauge--break .segment-gauge__cell--on,
 .segment-gauge--lunch .segment-gauge__cell--on {
-  background: #4477aa;
-  border-color: #66aadd;
-  box-shadow: 0 0 6px rgba(102, 170, 221, 0.45);
+  background: #5e9bda;
+  border-color: #a6d4ff;
+  box-shadow: 0 0 8px rgba(120, 180, 255, 0.62), 0 0 20px rgba(120, 180, 255, 0.38);
 }
 
 .segment-gauge--ceremony .segment-gauge__cell--on,
 .segment-gauge--prep .segment-gauge__cell--on {
-  background: #668855;
-  border-color: #99cc77;
+  background: #8cb970;
+  border-color: #c2f29c;
+  box-shadow: 0 0 8px rgba(160, 230, 120, 0.62), 0 0 20px rgba(160, 230, 120, 0.38);
 }
 
 .segment-gauge--task .segment-gauge__cell--on {
-  background: #aa8800;
-  border-color: #ffcc00;
+  background: #ddb800;
+  border-color: #ffe85e;
+  box-shadow: 0 0 8px rgba(255, 210, 60, 0.68), 0 0 21px rgba(255, 210, 60, 0.42);
 }
 
 .segment-gauge--report .segment-gauge__cell--on {
-  background: #008888;
-  border-color: #00dddd;
+  background: #14baba;
+  border-color: #74ffff;
+  box-shadow: 0 0 9px rgba(0, 230, 230, 0.66), 0 0 22px rgba(0, 230, 230, 0.4);
 }
 
 .segment-gauge--free .segment-gauge__cell--on {
-  background: #8844aa;
-  border-color: #cc66ff;
+  background: #b066d8;
+  border-color: #e3a8ff;
+  box-shadow: 0 0 9px rgba(200, 120, 255, 0.66), 0 0 22px rgba(200, 120, 255, 0.4);
 }
 
 .shift-phase-label {
@@ -663,6 +719,7 @@ body::before {
   letter-spacing: 1px;
   text-transform: uppercase;
   text-shadow: 0 0 4px rgba(220, 230, 224, 0.25);
+  margin-top: 6px;
 }
 
 .side-deck__time {
@@ -722,14 +779,15 @@ body::before {
 
 .operator-card {
   border: 2px solid #223344;
-  background: #0c121a;
+  background: #000000;
   padding: 6px 4px;
   text-align: center;
   cursor: pointer;
   user-select: none;
   box-shadow: 2px 2px 0px #05080c;
-  min-height: 58px;
+  min-height: 0; /* 縦が詰まっても3行が必ず収まるよう最小高さの下限を撤去 */
   height: 100%;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -760,9 +818,8 @@ body::before {
 
 .operator-card.present {
   border-color: #00ffaa;
-  background: #002211;
-  box-shadow: 0 0 8px rgba(0, 255, 170, 0.3), inset 0 0 6px rgba(0, 255, 170, 0.2);
-  animation: lamp-flash 0.15s ease-out;
+  background: #00140d; /* ほぼ黒＋わずかに緑 */
+  box-shadow: 2px 2px 0px #05080c;
 }
 .operator-card.present .op-id { color: #00ffaa; }
 .operator-card.present .op-name { color: #fff; text-shadow: 0 0 4px #00ffaa; }
@@ -1081,9 +1138,9 @@ body::before {
 }
 
 .fish-btn {
-  background: transparent;
-  border: 1px solid #336655;
-  color: #55bb88;
+  background: rgba(0, 40, 28, 0.35);
+  border: 1px solid #00aa77;
+  color: #3affc0;
   font-family: 'Courier New', Courier, monospace;
   font-size: 10px;
   font-weight: bold;
@@ -1101,8 +1158,9 @@ body::before {
 }
 
 .fish-btn--clr {
-  border-color: #552233;
-  color: #aa4455;
+  background: rgba(40, 8, 16, 0.35);
+  border-color: #cc3355;
+  color: #ff6f8a;
 }
 
 .fish-btn--clr:hover {
@@ -1326,7 +1384,7 @@ body::before {
 /* 大型ゲージ: 角を丸めて尖り感を抑え、縦幅は控えめに */
 .segment-gauge--xl {
   width: min(94vw, 600px);
-  gap: 6px;
+  gap: 8px;
   margin: 0;
 }
 
@@ -1414,18 +1472,18 @@ body::before {
 /* ── 掲示モード進入時の点灯アニメ（アーケード/CRT電源ON風） ──
    大時計→情報(時間割/ゲージ/残り/日直/ログ)を早めに、挨拶は最後にゆっくり点灯。
    小時計は data-mode 変化時にトランジションで消灯（=入れ替わり感）。 */
+/* 広がりつつ点灯。終端の発光ピーク→下降を低減し滑らかに収束。
+   完了時は transform を残さない（残存scaleでスタッキングが生じ重なる事故を防ぐ） */
 @keyframes crt-power-on {
-  0%   { opacity: 0; transform: scaleY(0.6); filter: brightness(1.7); }
-  35%  { opacity: 1; transform: scaleY(1.03); filter: brightness(1.25); }
-  60%  { opacity: 0.9; }
-  100% { opacity: 1; transform: scaleY(1); filter: none; }
+  0%   { opacity: 0; transform: scaleY(0.7); filter: brightness(1.28); }
+  55%  { opacity: 1; transform: scaleY(1); filter: brightness(1.07); }
+  100% { opacity: 1; transform: none; filter: none; }
 }
 
 /* transform を自前で持つ要素(日直の中央寄せ等)用: opacity/filter のみで点灯 */
 @keyframes crt-power-on-flat {
-  0%   { opacity: 0; filter: brightness(1.7); }
-  40%  { opacity: 1; filter: brightness(1.25); }
-  65%  { opacity: 0.9; }
+  0%   { opacity: 0; filter: brightness(1.28); }
+  55%  { opacity: 1; filter: brightness(1.07); }
   100% { opacity: 1; filter: none; }
 }
 
@@ -1460,13 +1518,10 @@ body::before {
 }
 
 /* モード切替のたびに再マウントして点灯アニメを再生。display:contents でレイアウトには影響させない */
-.mode-content {
-  display: contents;
-}
 
 /* ダッシュボード/ALLOCATION/TOOLS の各パネルもタブ切替時にCRT点灯（情報は早め）。
    .is-lit はモード変更時のみ付与されるため毎フレーム再起動しない。
-   ゲージ等を潰さないよう transform なしの flat 版を使用 */
+   CLOCKの「青い簡易ROSTER」と同じ flat 版（transform/scaleYなしのopacityとフィルタのみのCRT点灯） */
 .app-shell.is-lit .attendance-panel,
 .app-shell.is-lit .side-deck__block,
 .app-shell.is-lit .panel-timer,
@@ -1474,15 +1529,16 @@ body::before {
 .app-shell.is-lit .log-panel,
 .app-shell.is-lit .roster-grid,
 .app-shell.is-lit .controls-grid {
-  animation: crt-power-on-flat 0.7s ease-out both;
+  animation: crt-power-on-flat 1.15s ease-out both;
+  /* 各要素はCLOCKと同じ中央展開。ディレイで上の要素→下の要素の順に点灯 */
 }
-.app-shell.is-lit .attendance-panel { animation-delay: 0.03s; }
-.app-shell.is-lit .panel-timer { animation-delay: 0.03s; }
-.app-shell.is-lit .side-deck__block { animation-delay: 0.07s; }
-.app-shell.is-lit .roster-grid { animation-delay: 0.08s; }
-.app-shell.is-lit .panel-queue { animation-delay: 0.1s; }
-.app-shell.is-lit .log-panel { animation-delay: 0.1s; }
-.app-shell.is-lit .controls-grid { animation-delay: 0.12s; }
+.app-shell.is-lit .attendance-panel { animation-delay: 0.05s; }
+.app-shell.is-lit .panel-timer { animation-delay: 0.05s; }
+.app-shell.is-lit .side-deck__block { animation-delay: 0.05s; }
+.app-shell.is-lit .panel-queue { animation-delay: 0.16s; }
+.app-shell.is-lit .log-panel { animation-delay: 0.24s; }
+.app-shell.is-lit .roster-grid { animation-delay: 0.34s; }
+.app-shell.is-lit .controls-grid { animation-delay: 0.46s; }
 
 @media (prefers-reduced-motion: reduce) {
   .display-clock, .display-phase, .segment-gauge--xl, .display-remaining,
@@ -1619,7 +1675,7 @@ body::before {
 
 .roster-card {
   border: 1px dashed #00ffff;
-  background: #00111a;
+  background: #000000;
   padding: 4px 8px;
   display: flex;
   flex-direction: column;
@@ -2011,3 +2067,24 @@ body::before {
 .log-cursor { color: #00ffaa; }
 .roster-highlight { animation: breath-glow 2s infinite alternate ease-in-out; }
 @keyframes breath-glow { 0% { text-shadow: 0 0 2px #00ffff; color: #ccffff; } 100% { text-shadow: 0 0 8px #00ffff, 0 0 15px #00ffff; color: #ffffff; } }
+/* ── 日直の完了トグル ＆ ROSTER ステータス ── */
+.roster-name--toggle { cursor: pointer; }
+.roster-name--toggle:hover { background: rgba(0, 255, 255, 0.07); }
+.roster-done-mark { color: #356b6b; font-size: 0.8em; margin-right: 1px; flex-shrink: 0; }
+.roster-name--done { opacity: 0.45; animation: none !important; }
+.roster-name--done .roster-op-name { text-decoration: line-through; }
+.roster-name--done .roster-done-mark { color: #00ffaa; opacity: 1; text-shadow: 0 0 6px rgba(0, 255, 170, 0.6); }
+
+.duty-status {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  padding: 2px 7px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.duty-status--pending { color: #ff6f8a; }
+.duty-status--progress { color: #ffcf4d; }
+.duty-status--complete { color: #00ffaa; text-shadow: 0 0 6px rgba(0, 255, 170, 0.5); }
