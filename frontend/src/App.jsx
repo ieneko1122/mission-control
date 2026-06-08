@@ -87,14 +87,6 @@ export default function App() {
   });
   // タブ切替時の点灯アニメ用フラグ（モード変更のたびに off→on でアニメを1回再生）
   const [isLit, setIsLit] = useState(false);
-  // 日直の完了状況（当日分のみ保持。{date, done:[`role:id`]}）
-  const [dutyDone, setDutyDone] = useState(() => {
-    try {
-      const raw = JSON.parse(localStorage.getItem('mission_duty_done') || 'null');
-      if (raw && raw.date && Array.isArray(raw.done)) return raw;
-    } catch (_) {}
-    return { date: null, done: [] };
-  });
   const [aquariumSpawn, setAquariumSpawn] = useState(0);
   const [aquariumClear, setAquariumClear] = useState(0);
   const lastPhaseIdRef = useRef(null);
@@ -430,28 +422,31 @@ export default function App() {
     }
   };
 
-  // 日直の完了管理（当日分のみ。日付が変わると自動的に未完了＝未にリセット）
-  const dutyKey = (role, id) => `${role}:${id}`;
-  const isDutyDone = (role, id) => dutyDone.date === todayStr && dutyDone.done.includes(dutyKey(role, id));
-  const toggleDutyDone = (role, id) => {
-    setDutyDone(prev => {
-      const base = prev.date === todayStr ? prev.done : [];
-      const k = dutyKey(role, id);
-      const done = base.includes(k) ? base.filter(x => x !== k) : [...base, k];
-      const next = { date: todayStr, done };
-      localStorage.setItem('mission_duty_done', JSON.stringify(next));
-      return next;
-    });
+  // 日直の完了管理（サーバー保存=DB が正）。op.completed を真とし、当日でない古いROSTERは未扱い。
+  const isDutyDone = (op) => !isResultStale && !!op?.completed;
+  const toggleDutyDone = async (role, op) => {
+    if (isResultStale) { addLog('NOTE: ROSTER NOT FOR TODAY — RUN ALLOCATION FIRST.'); return; }
+    try {
+      await fetch(`${API_BASE}/missions/duty-complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operatorId: op.id, missionType: role, completed: !op.completed }),
+      });
+      await fetchLastResult();
+      addLog(`DUTY ${!op.completed ? 'DONE' : 'REOPEN'}: ${displayResultName(op)} [${role}]`);
+    } catch (err) {
+      addLog('ERROR: DUTY UPDATE FAILED.');
+    }
   };
 
   // ROSTER 全体の進捗（未 / 実施中 / 済）。当日のROSTERでない場合は「未(本日未割当)」
   const rosterAssignments = result ? [
-    ...(result.assembly || []).map(o => ['ASSEMBLY', o]),
-    ...(result.report || []).map(o => ['REPORT', o]),
-    ...(result.feedback || []).map(o => ['FEEDBACK', o]),
+    ...(result.assembly || []),
+    ...(result.report || []),
+    ...(result.feedback || []),
   ] : [];
   const dutyTotal = rosterAssignments.length;
-  const dutyDoneCount = rosterAssignments.filter(([role, o]) => isDutyDone(role, o.id)).length;
+  const dutyDoneCount = rosterAssignments.filter(o => isDutyDone(o)).length;
   const dutyStatus =
     (isResultStale || dutyTotal === 0) ? 'pending-stale' :
     dutyDoneCount === 0 ? 'pending' :
@@ -512,12 +507,12 @@ export default function App() {
 
   // 機能B+C: ROSTER の確定者1行。クリックで担当完了/未完了をトグル（完了は✓＋減光）
   const renderRosterName = (op, role) => {
-    const done = isDutyDone(role, op.id);
+    const done = isDutyDone(op);
     return (
       <div
         key={op.id}
         className={`roster-name roster-highlight roster-name--toggle ${done ? 'roster-name--done' : ''}`}
-        onClick={() => toggleDutyDone(role, op.id)}
+        onClick={() => toggleDutyDone(role, op)}
         title={done ? 'クリックで「未完了」に戻す' : 'クリックで「担当完了」にする'}
       >
         <span className="roster-done-mark">{done ? '✔' : '◯'}</span>

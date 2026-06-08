@@ -65,7 +65,7 @@ public class MissionControlService {
         for (InterruptQueue interrupt : queue) {
             if (filled >= slotCount) break;
             if (presents.contains(interrupt.getOperator().getId())) {
-                todayLogs.add(new MissionLog(null, today, interrupt.getOperator(), type, true, batchTime));
+                todayLogs.add(new MissionLog(null, today, interrupt.getOperator(), type, true, batchTime, false));
                 interruptQueueRepository.delete(interrupt);
                 log.info("[INTERRUPT] Operator {} recovered for {}", interrupt.getOperator().getName(), type);
                 filled++;
@@ -76,7 +76,7 @@ public class MissionControlService {
         while (filled < slotCount) {
             Operator op = pointer.next();
             if (presents.contains(op.getId())) {
-                todayLogs.add(new MissionLog(null, today, op, type, false, batchTime));
+                todayLogs.add(new MissionLog(null, today, op, type, false, batchTime, false));
                 filled++;
             } else {
                 interruptQueueRepository.save(InterruptQueue.create(op, type));

@@ -44,7 +44,13 @@ public class MissionMatrixController {
 
     public record AllocationRequest(List<Long> presentOperatorIds) {}
 
-    public record MissionAssignmentDTO(String missionType, List<OperatorDTO> assignedOperators) {}
+    // 割当オペレーター（担当完了フラグ付き）
+    public record AssignedOperatorDTO(Long id, String name, String nameKanji, int displayOrder, boolean completed) {}
+
+    public record MissionAssignmentDTO(String missionType, List<AssignedOperatorDTO> assignedOperators) {}
+
+    // 日直の担当完了トグル用
+    public record DutyCompleteRequest(Long operatorId, String missionType, boolean completed) {}
 
     // 【変更点1】フロントから送られてくるデータの形（プルダウンで選んだID）に合わせました
     public record AdminUpdateRequest(
@@ -87,16 +93,16 @@ public class MissionMatrixController {
         return missionLogRepository.findFirstByIsInterruptFalseOrderByIdDesc()
                 .map(lastLog -> {
                     List<MissionLog> batch = missionLogRepository.findByCreatedAt(lastLog.getCreatedAt());
-                    Map<MissionType, List<Operator>> grouped = batch.stream()
-                            .collect(Collectors.groupingBy(
-                                    MissionLog::getMissionType,
-                                    Collectors.mapping(MissionLog::getOperator, Collectors.toList())
-                            ));
+                    Map<MissionType, List<MissionLog>> grouped = batch.stream()
+                            .collect(Collectors.groupingBy(MissionLog::getMissionType));
                     List<MissionAssignmentDTO> assignments = grouped.entrySet().stream()
                             .map(e -> new MissionAssignmentDTO(
                                     e.getKey().name(),
                                     e.getValue().stream()
-                                            .map(op -> new OperatorDTO(op.getId(), op.getName(), op.getNameKanji(), op.getDisplayOrder()))
+                                            .map(l -> new AssignedOperatorDTO(
+                                                    l.getOperator().getId(), l.getOperator().getName(),
+                                                    l.getOperator().getNameKanji(), l.getOperator().getDisplayOrder(),
+                                                    l.isCompleted()))
                                             .toList()
                             ))
                             .toList();
@@ -175,20 +181,51 @@ public class MissionMatrixController {
 
         List<MissionLog> logs = missionControlService.calculateDailyMissions(request.presentOperatorIds());
 
-        Map<MissionType, List<Operator>> grouped = logs.stream()
-                .collect(Collectors.groupingBy(
-                        MissionLog::getMissionType,
-                        Collectors.mapping(MissionLog::getOperator, Collectors.toList())
-                ));
+        Map<MissionType, List<MissionLog>> grouped = logs.stream()
+                .collect(Collectors.groupingBy(MissionLog::getMissionType));
 
         return grouped.entrySet().stream()
                 .map(entry -> new MissionAssignmentDTO(
                         entry.getKey().name(),
                         entry.getValue().stream()
-                                .map(op -> new OperatorDTO(op.getId(), op.getName(), op.getNameKanji(), op.getDisplayOrder()))
+                                .map(l -> new AssignedOperatorDTO(
+                                        l.getOperator().getId(), l.getOperator().getName(),
+                                        l.getOperator().getNameKanji(), l.getOperator().getDisplayOrder(),
+                                        l.isCompleted()))
                                 .toList()
                 ))
                 .toList();
+    }
+
+    // -------------------------------------------------------------
+    // ENDPOINT 3: 日直の担当完了トグル（サーバー保存）
+    // 直近バッチ(最新の通常割当)の該当 MissionLog の completed を更新する
+    // -------------------------------------------------------------
+    @PostMapping("/missions/duty-complete")
+    @Transactional
+    public Map<String, String> setDutyComplete(@RequestBody DutyCompleteRequest req) {
+        Optional<MissionLog> lastLog = missionLogRepository.findFirstByIsInterruptFalseOrderByIdDesc();
+        if (lastLog.isEmpty()) {
+            return Map.of("status", "ERROR", "message", "割当がありません。");
+        }
+        MissionType type;
+        try {
+            type = MissionType.valueOf(req.missionType());
+        } catch (Exception e) {
+            return Map.of("status", "ERROR", "message", "不正なミッション種別です。");
+        }
+        List<MissionLog> batch = missionLogRepository.findByCreatedAt(lastLog.get().getCreatedAt());
+        boolean updated = false;
+        for (MissionLog l : batch) {
+            if (l.getMissionType() == type && l.getOperator().getId().equals(req.operatorId())) {
+                l.setCompleted(req.completed());
+                missionLogRepository.save(l);
+                updated = true;
+            }
+        }
+        return updated
+                ? Map.of("status", "SUCCESS", "message", "担当完了状態を更新しました。")
+                : Map.of("status", "ERROR", "message", "対象の割当が見つかりません。");
     }
 
     // -------------------------------------------------------------

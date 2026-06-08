@@ -35,4 +35,8 @@ public class MissionLog {
     // 🔥【ここを追加】1回分のロールバック判定に使用する作成日時
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    // 日直の担当完了フラグ（サーバー保存。割当(MissionLog)に紐づくため再起動・端末をまたいで一貫）
+    @Column(name = "completed", nullable = false, columnDefinition = "boolean default false")
+    private boolean completed;
 }
