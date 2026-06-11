@@ -12,10 +12,10 @@ rem PATH上の正しいJDK(java)を使わせる。
 set "JAVA_HOME="
 
 echo [Mission Control] Backend (Spring Boot / 8080) を起動します...
-start "Mission Control - Backend" cmd /k "mvnw.cmd spring-boot:run -DskipFrontend=true"
+start "Mission Control - Backend" /min cmd /k "mvnw.cmd spring-boot:run -DskipFrontend=true"
 
 echo [Mission Control] Frontend (Vite / 5173) を起動します...
-start "Mission Control - Frontend" /D "%~dp0frontend" cmd /k "npm run dev"
+start "Mission Control - Frontend" /min /D "%~dp0frontend" cmd /k "npm run dev"
 
 echo [Mission Control] バックエンドの起動完了を待っています (最大90秒)...
 powershell -NoProfile -Command "for($i=0;$i -lt 90;$i++){try{Invoke-WebRequest -Uri 'http://localhost:8080/api/status' -UseBasicParsing -TimeoutSec 2 | Out-Null; exit 0}catch{Start-Sleep -Seconds 1}}"
