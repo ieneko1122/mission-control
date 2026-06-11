@@ -30,7 +30,7 @@
 ./mvnw spring-boot:run
 ```
 
-デフォルトで `http://localhost:8080` で起動します。
+デフォルトで `http://localhost:18080` で起動します。
 
 ### フロントエンド
 
@@ -40,7 +40,7 @@ npm install
 npm run dev
 ```
 
-デフォルトで `http://localhost:5173` で起動します。Vite の開発サーバーは `/api` を `localhost:8080` にプロキシします。
+デフォルトで `http://localhost:5173` で起動します。Vite の開発サーバーは `/api` を `localhost:18080` にプロキシします。
 
 ## segfish モジュール
 

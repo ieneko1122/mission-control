@@ -1,3 +1,7 @@
+server:
+  # バックエンドの待受ポート（8080は他アプリと競合しやすいため余裕のある番号に変更）
+  port: 18080
+
 spring:
   application:
     name: mission-control
